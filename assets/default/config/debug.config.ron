@@ -1,0 +1,14 @@
+Debug((
+    // If true, opens a secondary window containing debug egui tools, such as the inspector and a tool to win or lose the game.
+    // show_debug_window: false,
+
+    // If true, skips past the main menu:
+    // skip_straight_to_game: false,
+
+    // If true, launches the game in full screen mode:
+    // launch_fullscreen: true,
+
+    origin_lines_display: Positive,
+    origin_lines_length: 10.,
+    origin_lines_cone_scale: 3.,
+))

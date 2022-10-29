@@ -1,0 +1,7 @@
+ModOrder((
+    mods: [
+        "default",
+        "mods/dev",
+        "profiles/my_profile",
+    ],
+))

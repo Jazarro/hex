@@ -1,8 +1,7 @@
+use crate::game::hex_grid::axial;
+use crate::game::hex_grid::axial::Pos;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
-
-use crate::coords::axial;
-use crate::coords::axial::Pos;
 
 pub fn spawn_hex(
     mut commands: Commands,
@@ -13,13 +12,13 @@ pub fn spawn_hex(
     (0..width).for_each(|z| {
         (0..length).for_each(|x| {
             let pos = Pos::new(x as f32, z as f32, 0.);
-            commands
-                .spawn_bundle(MaterialMeshBundle {
-                    mesh: meshes.add(create_mesh()),
-                    transform: Transform::from_translation(pos.to_pixel()),
-                    material: std_mats.add(Color::rgb(0.5, x as f32 / length as f32, z as f32 / width as f32).into()),
-                    ..default()
-                });
+            commands.spawn_bundle(MaterialMeshBundle {
+                mesh: meshes.add(create_mesh()),
+                transform: Transform::from_translation(pos.to_pixel()),
+                material: std_mats
+                    .add(Color::rgb(0.5, x as f32 / length as f32, z as f32 / width as f32).into()),
+                ..default()
+            });
         });
     });
 }

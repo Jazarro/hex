@@ -1,0 +1,5 @@
+Manifest((
+    name: "dev",
+    description: "Config overrides, for use during development to quickly test different settings.",
+    load_order_hint: 1,
+))

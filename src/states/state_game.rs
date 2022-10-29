@@ -1,16 +1,13 @@
-use crate::animate_simple::rotate;
-use crate::meshes::debug_lines::{apply_debug_lines};
-use crate::meshes::hexagon::spawn_hex;
 use bevy::app::{App, Plugin};
-use bevy::input::Input;
-use bevy::math::{Quat, Vec3};
 use bevy::pbr::{PointLight, PointLightBundle};
-use bevy::prelude::{
-    default, Camera3dBundle, Commands, Component, KeyCode, ParamSet, Query, Res, Time, Transform,
-};
+use bevy::prelude::*;
 use iyes_loopless::condition::ConditionSet;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
+use crate::animate_simple::rotate;
+use crate::game::camera::first_person::{move_camera, setup_camera, ActiveCamera};
+use crate::game::meshes::debug_lines::apply_debug_lines;
+use crate::game::meshes::hexagon::spawn_hex;
 use crate::states::appstate::AppState;
 
 pub struct GameState;
@@ -35,65 +32,6 @@ impl Plugin for GameState {
                 .with_system(rotate)
                 .into(),
         );
-    }
-}
-
-/// set up a simple 3D camera
-fn setup_camera(mut commands: Commands) {
-    // camera
-    commands
-        .spawn_bundle(Camera3dBundle {
-            // transform: Transform::from_xyz(200.0, 100.0, 200.0).looking_at(Vec3::ZERO, Vec3::Y),
-            // transform: Transform::from_xyz(20.0, 10.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
-            transform: Transform::from_xyz(1.0, 20.0, 1.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..default()
-        })
-        .insert(ActiveCamera::default());
-}
-
-#[derive(Default, Component)]
-pub struct ActiveCamera {}
-
-fn move_camera(
-    time: Res<Time>,
-    keys: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Transform, &ActiveCamera)>,
-) {
-    let direction = Vec3::new(
-        if keys.any_pressed([KeyCode::A, KeyCode::Left]) {
-            -1.
-        } else if keys.any_pressed([KeyCode::D, KeyCode::Right]) {
-            1.
-        } else {
-            0.
-        },
-        if keys.any_pressed([KeyCode::LShift, KeyCode::C]) {
-            -1.
-        } else if keys.any_pressed([KeyCode::Space]) {
-            1.
-        } else {
-            0.
-        },
-        if keys.any_pressed([KeyCode::S, KeyCode::Down]) {
-            1.
-        } else if keys.any_pressed([KeyCode::W, KeyCode::Up]) {
-            -1.
-        } else {
-            0.
-        },
-    );
-    let rotation = if keys.pressed(KeyCode::Q) {
-        -1.
-    } else if keys.pressed(KeyCode::E) {
-        1.
-    } else {
-        0.
-    };
-    for (mut transform, _) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_y(rotation * time.delta_seconds()));
-        transform.translation.x += direction.x;
-        transform.translation.y += direction.y;
-        transform.translation.z += direction.z;
     }
 }
 

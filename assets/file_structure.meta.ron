@@ -1,0 +1,7 @@
+FileStructure((
+    configs: [
+        "config/audio.config.ron",
+        "config/debug.config.ron",
+        "config/keys.config.ron",
+    ],
+))

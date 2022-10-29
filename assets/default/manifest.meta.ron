@@ -1,0 +1,5 @@
+Manifest((
+    name: "default",
+    description: "The base game files.",
+    load_order_hint: 0,
+))

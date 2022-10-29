@@ -5,7 +5,7 @@ pub const HEIGHT: f32 = 5.;
 /// Long radius, ie the distance between center and corner point.
 pub const RADIUS: f32 = 3.;
 
-const SQRT_THREE:f32 = 1.7320508;
+const SQRT_THREE: f32 = 1.7320508;
 const BASIS_Q: Vec2 = Vec2::new(3. / 2., SQRT_THREE / 2.);
 const BASIS_R: Vec2 = Vec2::new(0., SQRT_THREE);
 
@@ -36,4 +36,3 @@ impl Pos {
 //
 //     }
 // }
-

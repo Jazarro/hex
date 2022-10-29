@@ -7,7 +7,8 @@ use bevy::render::render_resource::{
 };
 
 use crate::animate_simple::{RotAxis, RotateTag};
-use crate::config::config_debug::{DebugConfig, OriginLinesDisplay};
+use crate::assets::config::config_debug::DebugConfig;
+use crate::assets::config::config_debug::OriginLinesDisplay;
 use crate::{default, Color, MaterialMeshBundle, Mesh, Transform, Vec3};
 
 pub fn apply_debug_lines(
@@ -165,7 +166,7 @@ pub struct LineMaterial {
 
 impl Material for LineMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/line_material.wgsl".into()
+        "default/shaders/line_material.wgsl".into()
     }
 
     fn specialize(
