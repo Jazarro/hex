@@ -9,9 +9,9 @@ pub fn setup_camera(mut commands: Commands) {
     // camera
     commands
         .spawn_bundle(Camera3dBundle {
-            // transform: Transform::from_xyz(200.0, 100.0, 200.0).looking_at(Vec3::ZERO, Vec3::Y),
-            // transform: Transform::from_xyz(20.0, 10.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
-            transform: Transform::from_xyz(1.0, 20.0, 1.0).looking_at(Vec3::ZERO, Vec3::Y),
+            // transform: Transform::from_xyz(200.0, 200.0, 100.0).looking_at(Vec3::ZERO, Vec3::Z),
+            // transform: Transform::from_xyz(20.0, 20.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
+            transform: Transform::from_xyz(1.0, 1.0, 20.0).looking_at(Vec3::ZERO, Vec3::Z),
             ..default()
         })
         .insert(ActiveCamera::default());
@@ -33,17 +33,17 @@ pub fn move_camera(
         } else {
             0.
         },
-        if keys.any_pressed([KeyCode::LShift, KeyCode::C]) {
-            -1.
-        } else if keys.any_pressed([KeyCode::Space]) {
-            1.
-        } else {
-            0.
-        },
         if keys.any_pressed([KeyCode::S, KeyCode::Down]) {
             1.
         } else if keys.any_pressed([KeyCode::W, KeyCode::Up]) {
             -1.
+        } else {
+            0.
+        },
+        if keys.any_pressed([KeyCode::LShift, KeyCode::C]) {
+            -1.
+        } else if keys.any_pressed([KeyCode::Space]) {
+            1.
         } else {
             0.
         },
@@ -56,7 +56,7 @@ pub fn move_camera(
         0.
     };
     for (mut transform, _) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_y(rotation * time.delta_seconds()));
+        transform.rotate(Quat::from_rotation_z(rotation * time.delta_seconds()));
         transform.translation.x += direction.x;
         transform.translation.y += direction.y;
         transform.translation.z += direction.z;

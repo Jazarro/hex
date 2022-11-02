@@ -41,13 +41,13 @@ fn move_light(
         Query<(&mut Transform, &PointLight)>,
     )>,
 ) {
-    if let Ok(pos) = queries
+    if let Ok(camera_pos) = queries
         .p0()
         .get_single()
         .map(|(transform, _)| transform.translation)
     {
-        for (mut transform, _) in queries.p1().iter_mut() {
-            transform.translation = pos;
+        for (mut light_transform, _) in queries.p1().iter_mut() {
+            light_transform.translation = camera_pos;
         }
     }
 }
@@ -61,7 +61,7 @@ fn setup_light(mut commands: Commands) {
             range: 1000.,
             ..default()
         },
-        transform: Transform::from_xyz(0.0, 200.0, 0.0),
+        transform: Transform::from_xyz(0.0, 0.0, 100.0),
         ..default()
     });
 }

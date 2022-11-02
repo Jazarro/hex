@@ -11,6 +11,9 @@ use crate::assets::config::config_debug::DebugConfig;
 use crate::assets::config::config_debug::OriginLinesDisplay;
 use crate::{default, Color, MaterialMeshBundle, Mesh, Transform, Vec3};
 
+/// Lines are XYZ -> RGB. X is Red, Y is Green, Z is Blue.
+/// If the lines are also drawn towards the negative, then the cones atop those lines will be
+/// darker and more stumpy to easily differentiate between positive and negative.
 pub fn apply_debug_lines(
     mut commands: Commands,
     config: Res<DebugConfig>,
@@ -27,13 +30,13 @@ pub fn apply_debug_lines(
         0.
     };
     let max = config.origin_lines_length;
-    // x-axis: Blue
+    // x-axis: Red
     commands.spawn_bundle(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(LineList {
             lines: vec![(Vec3::new(min, 0., 0.), Vec3::new(max, 0., 0.))],
         })),
         transform: Transform::default(),
-        material: line_mats.add(LineMaterial { color: Color::BLUE }),
+        material: line_mats.add(LineMaterial { color: Color::RED }),
         ..default()
     });
     commands.spawn_bundle(MaterialMeshBundle {
@@ -41,16 +44,16 @@ pub fn apply_debug_lines(
         transform: Transform::from_xyz(max, 0., 0.)
             .with_scale(Vec3::splat(config.origin_lines_cone_scale))
             .with_rotation(Quat::from_rotation_z(std::f32::consts::TAU * -0.25)),
-        material: std_mats.add(Color::BLUE.into()),
+        material: std_mats.add(Color::RED.into()),
         ..default()
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
         commands.spawn_bundle(MaterialMeshBundle {
-            mesh: meshes.add(Mesh::from(Cone::default())),
+            mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(min, 0., 0.)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))
                 .with_rotation(Quat::from_rotation_z(std::f32::consts::TAU * 0.25)),
-            material: std_mats.add(Color::BLUE.into()),
+            material: std_mats.add(Color::rgb(0.2, 0., 0.).into()),
             ..default()
         });
     }
@@ -74,21 +77,21 @@ pub fn apply_debug_lines(
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
         commands.spawn_bundle(MaterialMeshBundle {
-            mesh: meshes.add(Mesh::from(Cone::default())),
+            mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(0., min, 0.)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))
                 .with_rotation(Quat::from_rotation_x(std::f32::consts::TAU * 0.5)),
-            material: std_mats.add(Color::GREEN.into()),
+            material: std_mats.add(Color::rgb(0., 0.2, 0.).into()),
             ..default()
         });
     }
-    // z-axis: Red
+    // z-axis: Blue
     commands.spawn_bundle(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(LineList {
             lines: vec![(Vec3::new(0., 0., min), Vec3::new(0., 0., max))],
         })),
         transform: Transform::default(),
-        material: line_mats.add(LineMaterial { color: Color::RED }),
+        material: line_mats.add(LineMaterial { color: Color::BLUE }),
         ..default()
     });
     commands.spawn_bundle(MaterialMeshBundle {
@@ -96,16 +99,16 @@ pub fn apply_debug_lines(
         transform: Transform::from_xyz(0., 0., max)
             .with_scale(Vec3::splat(config.origin_lines_cone_scale))
             .with_rotation(Quat::from_rotation_x(std::f32::consts::TAU * 0.25)),
-        material: std_mats.add(Color::RED.into()),
+        material: std_mats.add(Color::BLUE.into()),
         ..default()
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
         commands.spawn_bundle(MaterialMeshBundle {
-            mesh: meshes.add(Mesh::from(Cone::default())),
+            mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(0., 0., min)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))
                 .with_rotation(Quat::from_rotation_x(std::f32::consts::TAU * -0.25)),
-            material: std_mats.add(Color::RED.into()),
+            material: std_mats.add(Color::rgb(0., 0., 0.2).into()),
             ..default()
         });
     }
@@ -186,6 +189,15 @@ pub struct Cone {
     pub height: f32,
     pub radius: f32,
     pub nr_facets: u32,
+}
+
+impl Cone {
+    pub fn stumpy() -> Self {
+        Cone {
+            height: 0.25,
+            ..default()
+        }
+    }
 }
 
 impl Default for Cone {
