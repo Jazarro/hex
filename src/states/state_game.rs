@@ -7,7 +7,7 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 use crate::animate_simple::rotate;
 use crate::game::camera::first_person::{move_camera, setup_camera, ActiveCamera};
 use crate::game::meshes::debug_lines::apply_debug_lines;
-use crate::game::meshes::hexagon::spawn_hex;
+use crate::game::meshes::hexagon::spawn_random_chunk;
 use crate::states::appstate::AppState;
 
 pub struct GameState;
@@ -21,7 +21,7 @@ impl Plugin for GameState {
                 .with_system(setup_camera)
                 .with_system(setup_light)
                 .with_system(apply_debug_lines)
-                .with_system(spawn_hex)
+                .with_system(spawn_random_chunk)
                 .into(),
         )
         .add_system_set(

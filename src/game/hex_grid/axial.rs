@@ -19,7 +19,6 @@ const QR_PER_X: Vec2 = Vec2::new(3. / 2., 1. / 3.);
 /// along the y-axis in a regular 'square' coordinate system.
 const QR_PER_Y: Vec2 = Vec2::new(0., SQRT_THREE / 3.);
 
-
 /// A hexagonal coordinate in the flat-topped axial coordinate system.
 /// For more information, see https://www.redblobgames.com/grids/hexagons/
 pub struct Pos {
