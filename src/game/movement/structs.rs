@@ -10,7 +10,11 @@ pub struct MoveState {
 pub struct MoveParams {
     pub accel:f32,
     pub max_speed:f32,
+    pub boost_mod:f32,
     pub max_fall_speed:f32,
+    pub vel_decay_rate:f32,
+    pub turn_speed:f32,
+    pub flying:bool
 }
 
 #[derive(Default)]
