@@ -1,11 +1,10 @@
 use bevy::input::mouse::MouseMotion;
-use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat, Without};
+use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat, Without, debug};
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::structs::{MoveState, MoveParams};
 use crate::MoveInput;
 
-// note: this can easily be modified to move all actors that require precise control
 pub fn player_movement_system(mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,
                             cam_q: Query<&Transform, (With<Camera>, With<PlayerCamera>, Without<Player>)>,
                             input: Res<MoveInput>, 
@@ -20,7 +19,7 @@ pub fn player_movement_system(mut q: Query<(&mut MoveState, &mut MoveParams, &mu
                 mouse_mov += ev.delta;
             }
             // Rotate body using mouse.x delta. Use only the Z axis.
-            tform.rotate_local_z(mouse_mov.x * dt * move_params.turn_speed);
+            tform.rotate_local_z(-mouse_mov.x * dt * move_params.turn_speed);
     
             if move_params.flying{
                 new_vel = flying_movement(&input, &move_params, &move_state, tform.rotation.clone(), cam_tform.rotation.clone(), dt);
@@ -54,9 +53,16 @@ fn walking_movement(input: &MoveInput, move_params: &MoveParams, move_state: &Mo
             planar_vel = Vec2::ZERO; // filter out low velocities
         }
     } else {
-        // input detected, adjust velocity.
+        // Input detected, adjust velocity.
         let accel_vector = (body_rot * (input.xy_plane.normalize() * move_params.accel).extend(0.0)).truncate();
-        planar_vel += accel_vector * dt;
+        // Boost acceleration for vectors countering current velocity.
+        let mut accel_mod:f32 = 1.0;
+        if planar_vel.length_squared() > 0.0
+        {
+            let dot_to_vel = accel_vector.normalize().dot(planar_vel.normalize());
+            accel_mod = (2.0 - ((dot_to_vel + 1.0) * 0.5)) * 3.8;
+        }
+        planar_vel += accel_vector * dt * accel_mod;
         planar_vel.clamp_length_max(move_params.max_speed);
     }
     // We don't need to project the vector onto terrain slope, since every surface is flat.
@@ -66,4 +72,8 @@ fn walking_movement(input: &MoveInput, move_params: &MoveParams, move_state: &Mo
 
 fn flying_movement(input: &MoveInput, move_params: &MoveParams, move_state: &MoveState, body_rot: Quat, cam_rot: Quat, dt:f32) -> Vec3 {
     return Vec3::ZERO;
+}
+
+fn remap(source: f32, source_from: f32, source_to:f32, target_from: f32, target_to: f32) -> f32{
+    target_from + (source-source_from)*(target_to-target_from)/(source_to/source_from)
 }

@@ -1,9 +1,7 @@
 use bevy::input::Input;
 use bevy::input::mouse::MouseMotion;
 use bevy::math::{Quat, Vec3};
-use bevy::prelude::{
-    default, Camera3dBundle, Commands, Component, Query, Res, Time, Transform, EventReader, EulerRot, Bundle, Vec2,
-};
+use bevy::prelude::{default, Camera3dBundle, Commands, Component, Query, Res, Time, Transform, EventReader, EulerRot, Bundle, Vec2, ResMut, Windows};
 #[derive(Default, Component)]
 pub struct PlayerCamera {
     pub height:f32,
@@ -31,9 +29,9 @@ pub fn rotate_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>,
             mouse_mov += ev.delta;
         }
         let mut x_rot:f32 = tform.rotation.to_euler(EulerRot::XYZ).0;
-        x_rot += mouse_mov.y * time.delta_seconds() * cam.x_rot_speed;
+        x_rot += -mouse_mov.y * time.delta_seconds() * cam.x_rot_speed;
         let max = cam.x_rot_max_deg.to_radians();
-        x_rot = x_rot.clamp(-max, max);
+        x_rot = x_rot.clamp(-max+0.5, max+0.5); // need to offset by 90deg, otherwise cam netural rot is looking downward.
         tform.rotation = Quat::from_euler(EulerRot::XYZ, x_rot, 0.0, 0.0);
     }
 }
@@ -42,4 +40,12 @@ pub fn position_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>)
     if let Ok((mut tform, cam)) = q.get_single_mut() {
         tform.translation = Vec3::new(0.0, 0.0, cam.height);
     }
+}
+
+pub fn cursor_grab(
+    mut windows: ResMut<Windows>,
+) {
+    let window = windows.get_primary_mut().unwrap();
+    window.set_cursor_lock_mode(true);
+    window.set_cursor_visibility(false);
 }

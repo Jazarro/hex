@@ -6,7 +6,7 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::animate_simple::rotate;
 use crate::game::actors::player::setup_player;
-use crate::game::camera::first_person::{rotate_player_camera, position_player_camera, PlayerCamera};
+use crate::game::camera::first_person::{rotate_player_camera, position_player_camera, PlayerCamera, cursor_grab};
 use crate::game::meshes::debug_lines::apply_debug_lines;
 use crate::game::meshes::hexagon::spawn_random_chunk;
 use crate::game::movement::char_control::player_movement_system;
@@ -20,6 +20,7 @@ impl Plugin for GameState {
             AppState::Game,
             ConditionSet::new()
                 .run_in_state(AppState::Game)
+                .with_system(cursor_grab)
                 .with_system(setup_light)
                 .with_system(setup_player)
                 .with_system(apply_debug_lines)
