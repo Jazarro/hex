@@ -1,5 +1,5 @@
 use bevy::input::mouse::MouseMotion;
-use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat};
+use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat, Without};
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::structs::{MoveState, MoveParams};
@@ -7,7 +7,7 @@ use crate::MoveInput;
 
 // note: this can easily be modified to move all actors that require precise control
 pub fn player_movement_system(mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,
-                            cam_q: Query<&Transform, (With<Camera>, With<PlayerCamera>)>,
+                            cam_q: Query<&Transform, (With<Camera>, With<PlayerCamera>, Without<Player>)>,
                             input: Res<MoveInput>, 
                             mut mouse: EventReader<MouseMotion>,
                             time: Res<Time>){
@@ -20,7 +20,7 @@ pub fn player_movement_system(mut q: Query<(&mut MoveState, &mut MoveParams, &mu
                 mouse_mov += ev.delta;
             }
             // Rotate body using mouse.x delta. Use only the Z axis.
-            tform.rotate_local_y(mouse_mov.x * dt * move_params.turn_speed);
+            tform.rotate_local_z(mouse_mov.x * dt * move_params.turn_speed);
     
             if move_params.flying{
                 new_vel = flying_movement(&input, &move_params, &move_state, tform.rotation.clone(), cam_tform.rotation.clone(), dt);
@@ -49,7 +49,7 @@ fn walking_movement(input: &MoveInput, move_params: &MoveParams, move_state: &Mo
     if input.xy_plane.length_squared() < 0.01 {
         // No input, decay planar velocity.
         // TODO: change decay rate depending on grounding
-        planar_vel *= move_params.vel_decay_rate;
+        planar_vel *= move_params.vel_decay_factor;
         if planar_vel.length_squared() < 0.001{
             planar_vel = Vec2::ZERO; // filter out low velocities
         }
