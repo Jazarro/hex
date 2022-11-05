@@ -46,18 +46,18 @@ pub fn check_mod_order_is_present(
 pub fn load_manifests(
     mut commands: Commands,
     server: Res<AssetServer>,
-    mut meta_handles: ResMut<LoaderHandles>,
+    mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
 ) {
     info!("Loading mod manifests...");
-    let mod_order = assets.get(&meta_handles.mod_order);
+    let mod_order = assets.get(&handles.mod_order);
     let mod_order = mod_order
         .as_deref()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order();
     for mod_name in mod_order.mods.iter() {
         info!("\t...loading mods/{}/manifest.meta.ron", mod_name);
-        meta_handles.manifests.insert(
+        handles.manifests.insert(
             mod_name.to_string(),
             server.load(&format!("{}/manifest.meta.ron", mod_name)),
         );
@@ -69,13 +69,22 @@ pub fn check_manifests_are_present(
     mut commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
+    mut assets: ResMut<Assets<MetaAsset>>,
 ) {
+    let mut mod_order = assets.get_mut(&handles.mod_order);
+    let mod_order = mod_order
+        .as_deref_mut()
+        .expect("mod_order.meta.ron wasn't loaded (yet)!")
+        .as_mod_order_mut();
     let all_finished = handles.manifests.keys().fold(true, |acc, mod_name| {
         match server.get_load_state(handles.manifests.get(mod_name).unwrap()) {
             LoadState::Loaded => acc,
             LoadState::Failed => {
-                error!("Failed to load /{}/manifest.meta.ron!", mod_name);
-                false
+                error!("Failed to load a {}'s mod manifest, skipping that mod...", mod_name);
+                if let Some((index, _)) = mod_order.mods.iter().enumerate().find(|(_, item)| item == &mod_name) {
+                    mod_order.mods.remove(index);
+                }
+                acc
             }
             _ => false,
         }
@@ -88,15 +97,15 @@ pub fn check_manifests_are_present(
 pub fn load_files(
     mut commands: Commands,
     server: Res<AssetServer>,
-    mut meta_handles: ResMut<LoaderHandles>,
+    mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
 ) {
-    let mod_order = assets.get(&meta_handles.mod_order);
+    let mod_order = assets.get(&handles.mod_order);
     let mod_order = mod_order
         .as_deref()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order();
-    let file_structure = assets.get(&meta_handles.file_structure);
+    let file_structure = assets.get(&handles.file_structure);
     let file_structure = file_structure
         .as_deref()
         .expect("file_structure.meta.ron wasn't loaded (yet)!")
@@ -106,7 +115,7 @@ pub fn load_files(
             let path = format!("{}/{}", mod_name, filename);
             if let Ok(_) = server.asset_io().get_metadata((&path).as_ref()) {
                 // Path must exist, so we'll try to load it.
-                meta_handles.put_config(filename, server.load(&path));
+                handles.put_config(filename, server.load(&path));
             }
         }
     }

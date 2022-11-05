@@ -69,6 +69,13 @@ impl MetaAsset {
             panic!("Tried to unwrap MetaAsset as ModOrder but the asset contained something else.");
         }
     }
+    pub fn as_mod_order_mut(&mut self) -> &mut ModOrder {
+        if let Self::ModOrder(value) = self {
+            value
+        } else {
+            panic!("Tried to unwrap MetaAsset as ModOrder but the asset contained something else.");
+        }
+    }
     pub fn as_file_structure(&self) -> &FileStructure {
         if let Self::FileStructure(value) = self {
             value
