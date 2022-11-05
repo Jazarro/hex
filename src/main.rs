@@ -9,6 +9,8 @@ use bevy::window::close_on_esc;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::game::meshes::debug_lines::LineMaterial;
+use crate::game::movement::input::read_movement_input;
+use crate::game::movement::structs::MoveInput;
 use crate::states::appstate::AppState;
 use crate::states::state_game::GameState;
 use crate::states::state_loading::LoadingState;
@@ -37,9 +39,12 @@ fn main() {
         filter: "error".into(),
         level: Level::ERROR,
     });
+    app.insert_resource(MoveInput::default());
     app.add_plugins(DefaultPlugins)
         .add_plugin(MaterialPlugin::<LineMaterial>::default())
         .add_system(close_on_esc)
+        // reading movement input here, in case we need it for things like UI navigation in menu - F
+        .add_system(read_movement_input) 
         .add_loopless_state(AppState::Loading)
         .add_plugin(LoadingState)
         .add_plugin(GameState)
