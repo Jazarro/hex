@@ -31,7 +31,7 @@ pub fn rotate_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>,
         let mut x_rot:f32 = tform.rotation.to_euler(EulerRot::XYZ).0;
         x_rot += -mouse_mov.y * time.delta_seconds() * cam.x_rot_speed;
         let max = cam.x_rot_max_deg.to_radians();
-        x_rot = x_rot.clamp(-max+0.5, max+0.5); // need to offset by 90deg, otherwise cam netural rot is looking downward.
+        x_rot = x_rot.clamp(-max+1.5, max+1.5); // need to offset by 90deg, otherwise cam netural rot is looking downward.
         tform.rotation = Quat::from_euler(EulerRot::XYZ, x_rot, 0.0, 0.0);
     }
 }

@@ -3,7 +3,7 @@ use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, 
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::structs::{MoveState, MoveParams};
-use crate::MoveInput;
+use crate::{EulerRot, MoveInput};
 
 pub fn player_movement_system(mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,
                             cam_q: Query<&Transform, (With<Camera>, With<PlayerCamera>, Without<Player>)>,
@@ -63,15 +63,52 @@ fn walking_movement(input: &MoveInput, move_params: &MoveParams, move_state: &Mo
             accel_mod = (2.0 - ((dot_to_vel + 1.0) * 0.5)) * 3.8;
         }
         planar_vel += accel_vector * dt * accel_mod;
-        planar_vel.clamp_length_max(move_params.max_speed);
+        planar_vel = planar_vel.clamp_length_max(move_params.max_speed);
     }
     // We don't need to project the vector onto terrain slope, since every surface is flat.
     // TODO: resolve gravity and jumping - vertical movement. Requires collisions and gravity.
     Vec3::new(planar_vel.x, planar_vel.y, vert_vel)
 }
 
-fn flying_movement(input: &MoveInput, move_params: &MoveParams, move_state: &MoveState, body_rot: Quat, cam_rot: Quat, dt:f32) -> Vec3 {
-    return Vec3::ZERO;
+fn flying_movement(input: &MoveInput, move_params: &MoveParams, move_state: &MoveState, body_rot: Quat, mut cam_rot: Quat, dt:f32) -> Vec3 {
+    let mut vel = move_state.velocity;
+    let mut input_dir = input.xy_plane.extend(0.0);
+    let mut max_speed = move_params.max_speed;
+    if input.fast_held {
+        max_speed *= move_params.boost_mod;
+    }
+    cam_rot *= Quat::from_euler(EulerRot::XYZ, -1.5, 0.0, 0.0);
+    input_dir = cam_rot * input_dir;
+    if input.up_held {
+        input_dir.z += 1.0;
+    }
+    if input.down_held {
+        input_dir.z -= 1.0;
+    }
+    input_dir = input_dir.normalize_or_zero();
+    if input_dir.length_squared() < 0.01 {
+        // No input, decay velocity.
+        vel *= move_params.vel_decay_factor;
+        if vel.length_squared() < 0.001 {
+            vel = Vec3::ZERO; // filter out low velocities
+        }
+    } else {
+        // Input detected, adjust velocity.
+        let accel_vector = body_rot * (input_dir * move_params.accel);
+        // Boost acceleration for vectors countering current velocity.
+        let mut accel_mod:f32 = 1.0;
+        if input.fast_held {
+            accel_mod *= move_params.boost_mod;
+        }
+        if vel.length_squared() > 0.0
+        {
+            let dot_to_vel = accel_vector.normalize().dot(vel.normalize());
+            accel_mod = (2.0 - ((dot_to_vel + 1.0) * 0.5)) * 3.8;
+        }
+        vel += accel_vector * dt * accel_mod;
+        vel = vel.clamp_length_max(max_speed);
+    }
+    vel
 }
 
 fn remap(source: f32, source_from: f32, source_to:f32, target_from: f32, target_to: f32) -> f32{
