@@ -54,12 +54,13 @@ pub fn spawn_random_chunk(
                         mesh: meshes.add(create_mesh()),
                         transform: Transform::from_translation(pos.to_xyz()),
                         material: std_mats.add(
-                            Color::rgb(
-                                q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
-                                r as f32 / chunk::CHUNK_DIMENSION_R as f32,
-                                z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
-                            )
-                            .into(),
+                            // Color::rgb(
+                            //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
+                            //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
+                            //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
+                            // )
+                            // .into(),
+                            Color::WHITE.into(),
                         ),
                         ..default()
                     });
@@ -117,7 +118,7 @@ fn calc_pos(angle: f32) -> (Vec3, Vec3) {
     (pos_bottom, pos_top)
 }
 
-fn create_mesh() -> Mesh {
+pub fn create_mesh() -> Mesh {
     let normal_bottom = Vec3::new(0.0, 0.0, -1.0);
     let normal_top = Vec3::new(0.0, 0.0, 1.0);
     let vertex_bottom = (Vec3::ZERO, normal_bottom, [1.0, 1.0]);

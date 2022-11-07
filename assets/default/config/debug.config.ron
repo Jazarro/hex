@@ -9,6 +9,6 @@ Debug((
     // launch_fullscreen: true,
 
     origin_lines_display: Positive,
-    origin_lines_length: 10.,
-    origin_lines_cone_scale: 3.,
+    origin_lines_length: 100.,
+    origin_lines_cone_scale: 10.,
 ))

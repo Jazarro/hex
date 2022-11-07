@@ -1,10 +1,12 @@
 use bevy::asset::{AssetLoader, BoxedFuture, LoadContext, LoadedAsset};
+use bevy::prelude::Commands;
 use bevy::reflect::TypeUuid;
 use serde::{Deserialize, Serialize};
 
 use crate::assets::config::config_audio::AudioConfig;
 use crate::assets::config::config_debug::DebugConfig;
 use crate::assets::config::config_keys::KeysConfig;
+use crate::assets::config::config_world::WorldConfig;
 use crate::assets::loading::meta::MergingAsset;
 
 /// This wrapper around the different config types is needed to create a single AssetLoader for
@@ -16,6 +18,26 @@ pub enum Config {
     Audio(AudioConfig),
     Debug(DebugConfig),
     Keys(KeysConfig),
+    World(WorldConfig),
+}
+
+impl Config {
+    pub fn insert(self, commands: &mut Commands) {
+        match self {
+            Config::Audio(value) => {
+                commands.insert_resource(value);
+            }
+            Config::Debug(value) => {
+                commands.insert_resource(value);
+            }
+            Config::Keys(value) => {
+                commands.insert_resource(value);
+            }
+            Config::World(value) => {
+                commands.insert_resource(value);
+            }
+        }
+    }
 }
 
 impl MergingAsset for Config {
@@ -23,6 +45,7 @@ impl MergingAsset for Config {
         match self {
             Config::Audio(_) => self.clone(),
             Config::Debug(_) => self.clone(),
+            Config::World(_) => self.clone(),
             Config::Keys(value) => {
                 if let Some(Config::Keys(accumulator)) = accumulator {
                     Config::Keys(value.merge(Some(accumulator)))

@@ -28,6 +28,7 @@ noise = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 rand = "*"
 ron = "*"
+splines = "4.1.1"
 
 [dependencies.bevy]
 version = "0.8.*"

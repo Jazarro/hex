@@ -14,7 +14,7 @@ use crate::{default, Color, MaterialMeshBundle, Mesh, Transform, Vec3};
 /// Lines are XYZ -> RGB. X is Red, Y is Green, Z is Blue.
 /// If the lines are also drawn towards the negative, then the cones atop those lines will be
 /// darker and more stumpy to easily differentiate between positive and negative.
-pub fn apply_debug_lines(
+pub fn spawn_debug_lines(
     mut commands: Commands,
     config: Res<DebugConfig>,
     mut meshes: ResMut<Assets<Mesh>>,

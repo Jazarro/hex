@@ -7,11 +7,11 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::animate_simple::rotate;
 use crate::game::actors::player::setup_player;
-use crate::game::camera::first_person::{
-    cursor_grab, position_player_camera, rotate_player_camera, PlayerCamera,
-};
-use crate::game::meshes::debug_lines::apply_debug_lines;
+use crate::game::camera::first_person::{cursor_grab, PlayerCamera, position_player_camera, rotate_player_camera};
+use crate::game::meshes::debug_lines::spawn_debug_lines;
+
 use crate::game::meshes::hexagon::{spawn_chunk, spawn_random_chunk};
+use crate::game::meshes::sun::{animate_sun, spawn_sun};
 use crate::game::movement::char_control::player_movement_system;
 use crate::game::procedural_generation::{setup_chunks, Chunks};
 use crate::states::appstate::AppState;
@@ -26,10 +26,10 @@ impl Plugin for GameState {
             ConditionSet::new()
                 .run_in_state(AppState::Game)
                 .with_system(cursor_grab)
-                .with_system(setup_light)
+                .with_system(spawn_sun)
                 .with_system(setup_player)
+                .with_system(spawn_debug_lines)
                 .with_system(spawn_chunk)
-                .with_system(apply_debug_lines)
                 // .with_system(spawn_random_chunk)
                 .into(),
         )
@@ -44,7 +44,7 @@ impl Plugin for GameState {
         .add_system_set(
             ConditionSet::new()
                 .run_in_state(AppState::Game)
-                .with_system(move_light)
+                .with_system(animate_sun)
                 .with_system(rotate)
                 .with_system(player_movement_system)
                 .with_system(rotate_player_camera)

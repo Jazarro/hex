@@ -168,17 +168,10 @@ pub fn resolve_mods(
                     .expect("A config wasn't loaded (yet)!");
                 Some(config.merge(acc))
             });
-        match config {
-            Some(Config::Audio(value)) => {
-                commands.insert_resource(value);
-            }
-            Some(Config::Debug(value)) => {
-                commands.insert_resource(value);
-            }
-            Some(Config::Keys(value)) => {
-                commands.insert_resource(value);
-            }
-            None => (), //TODO: Panic or something?
+        if let Some(config) = config {
+            config.insert(&mut commands);
+        } else {
+            panic!("Failed to load resource {}.", config_type);
         }
     }
     commands.insert_resource(NextState(LoadProcess::DoneLoading));
