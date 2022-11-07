@@ -52,10 +52,12 @@ fn main() {
         .add_loopless_state(AppState::Loading)
         .add_plugin(LoadingState)
         .add_plugin(GameState)
-        .add_plugin(DebugWindowPlugin)
         .add_system(handle_window)
-        .add_system(log_state_changes)
-        .run();
+        .add_system(log_state_changes);
+        // Show debug window only if the debugwindow feature is enabled:
+        #[cfg(feature = "debugwindow")]
+        app.add_plugin(DebugWindowPlugin);
+        app.run();
 }
 
 pub fn log_state_changes(state: Res<CurrentState<AppState>>) {

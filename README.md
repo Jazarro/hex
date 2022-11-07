@@ -2,6 +2,10 @@
 
 GameJam entry for the rad team
 
+# Getting Started
+
+To enable a second window with debug information, enable the 'debugwindow' feature. (`cargo run --features debugwindow`)
+
 # Tooling
 
 ## clippy

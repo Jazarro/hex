@@ -3,6 +3,10 @@ name = "hex"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+# Defines a feature named `debugwindow` that does not enable any other features.
+debugwindow = []
+
 [workspace]
 resolver = "2"
 
