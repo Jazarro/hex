@@ -15,8 +15,10 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
+bevy-inspector-egui = "0.13.0"
 bevy_kira_audio = { version = "0.12.0", features = ["ogg"] }
 iyes_loopless = "0.7.*"
+noise = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 rand = "*"
 ron = "*"
@@ -31,7 +33,7 @@ features = [
     # These are the default features:
     # (re-enable whichever you like)
     "bevy_asset",
-#    "bevy_scene",
+    #    "bevy_scene",
 
     # Bevy functionality:
     #    "animation",          # Animation support
@@ -40,7 +42,7 @@ features = [
     "bevy_winit", # Window management
     "x11", # Linux: Support X11 windowing system
     #    "filesystem_watcher", # Asset hot-reloading
-    "render",             # Graphics Rendering
+    "render", # Graphics Rendering
 
     ## "render" actually just includes:
     ## (feel free to use just a subset of these, instead of "render")
@@ -53,7 +55,7 @@ features = [
     "bevy_ui", # UI toolkit
 
     # File formats:
-#    "png",
+    #    "png",
     #    "hdr",
     #    "vorbis",
 
@@ -78,7 +80,7 @@ features = [
     #    "wav",
 
     # Development/Debug features:
-#        "dynamic",      # Dynamic linking for faster compile-times
+    #        "dynamic",      # Dynamic linking for faster compile-times
     #    "trace",        # Enable tracing for performance measurement
     #    "trace_tracy",  # Tracing using `tracy`
     #    "trace_chrome", # Tracing using the Chrome format

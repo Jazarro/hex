@@ -6,6 +6,7 @@ extern crate core;
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
+use bevy_inspector_egui::WorldInspectorPlugin;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::game::meshes::debug_lines::LineMaterial;
@@ -42,9 +43,10 @@ fn main() {
     app.insert_resource(MoveInput::default());
     app.add_plugins(DefaultPlugins)
         .add_plugin(MaterialPlugin::<LineMaterial>::default())
+        .add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui
         .add_system(close_on_esc)
         // reading movement input here, in case we need it for things like UI navigation in menu - F
-        .add_system(read_movement_input) 
+        .add_system(read_movement_input)
         .add_loopless_state(AppState::Loading)
         .add_plugin(LoadingState)
         .add_plugin(GameState)
