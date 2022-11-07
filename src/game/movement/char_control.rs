@@ -1,5 +1,5 @@
 use bevy::input::mouse::MouseMotion;
-use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat, Without, debug};
+use bevy::prelude::{Query, Res, Time, Transform, With, Vec3, Vec2, EventReader, Camera, Quat, Without, };
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::structs::{MoveState, MoveParams};

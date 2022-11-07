@@ -1,5 +1,12 @@
+use bevy::math::{IVec2, Vec3Swizzles};
 use rand::distributions::Bernoulli;
 use rand::distributions::Distribution;
+
+use crate::game::hex_grid::axial::Pos;
+use crate::game::hex_grid::chunks::{map_value, xy_to_index};
+use crate::game::procedural_generation::biomes::generate_biomes;
+use crate::game::procedural_generation::block::{Block, BlockType};
+use crate::game::procedural_generation::noise_generation::{generate_noise, get_noise_profile, NoiseLayer};
 
 pub const CHUNK_DIMENSION_Q: usize = 16;
 pub const CHUNK_DIMENSION_R: usize = 16;
@@ -9,9 +16,6 @@ pub const CHUNK_DIMENSION_Z: usize = 16;
 pub struct Chunk {
     blocks: [[[Option<Block>; CHUNK_DIMENSION_Q]; CHUNK_DIMENSION_R]; CHUNK_DIMENSION_Z],
 }
-
-#[derive(Default, Clone)]
-pub struct Block {}
 
 impl Chunk {
     pub fn get(&self, q: usize, r: usize, z: usize) -> &Option<Block> {
@@ -57,6 +61,46 @@ impl Chunk {
                 });
             });
         });
+        chunk
+    }
+    pub fn new(position: IVec2) -> Self {
+        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).to_xyz().xy().as_ivec2();
+        let elevation_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Elevation));
+        let humidity_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Humidity));
+        let temperature_noise =
+            generate_noise(xy_position, get_noise_profile(NoiseLayer::Temperature));
+
+        let biomes = generate_biomes(humidity_noise, temperature_noise);
+        let mut chunk = Chunk::default();
+
+        for q in 0..CHUNK_DIMENSION_Q {
+            for r in 0..CHUNK_DIMENSION_R {
+                let xy = Pos::new(q as f32, r as f32, 0.).to_xyz().xy().as_ivec2();
+                let elevation = elevation_noise[xy_to_index(xy)];
+
+                let biome_type = biomes[xy_to_index(xy)];
+
+                for z in 0..CHUNK_DIMENSION_Z {
+                    let block_type: BlockType;
+                    let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_DIMENSION_Z as f64);
+                    if z < z_elevation as usize {
+                        block_type = BlockType::Stone;
+                    } else {
+                        block_type = BlockType::Air;
+                    }
+
+                    if matches!(block_type, BlockType::Air) {
+                        chunk.set(q, r, z, None);
+                    } else {
+                        chunk.set(q, r, z, Some(Block {
+                            block_type,
+                            biome_type,
+                        }));
+                    }
+                }
+            }
+        }
+
         chunk
     }
 }

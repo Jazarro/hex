@@ -1,6 +1,6 @@
 use bevy::{prelude::{Component, Bundle}, transform::TransformBundle};
 
-use crate::game::{camera::first_person::PlayerCameraBundle, movement::structs::{MoveState, MoveParams}};
+use crate::game::{ movement::structs::{MoveState, MoveParams}};
 
 #[derive(Component, Default)]
 pub struct Player;

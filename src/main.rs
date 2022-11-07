@@ -3,7 +3,6 @@
 
 extern crate core;
 
-use crate::debug_window::DebugWindowPlugin;
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;

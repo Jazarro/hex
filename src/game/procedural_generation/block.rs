@@ -1,10 +1,9 @@
-use crate::game::procedural_generation::{xy_to_index, xyz_to_index};
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
-
-use super::{
-    generate_biomes, generate_noise, get_noise_profile, map_value, BiomeType, NoiseLayer,
-    CHUNK_DEPTH, CHUNK_HEIGHT, CHUNK_WIDTH,
-};
+use crate::game::hex_grid::axial::Pos;
+use crate::game::hex_grid::chunks::{CHUNK_DEPTH, CHUNK_HEIGHT, CHUNK_WIDTH, map_value, xy_to_index, xyz_to_index};
+use crate::game::procedural_generation::biomes::{BiomeType, generate_biomes};
+use crate::game::procedural_generation::noise_generation::{generate_noise, get_noise_profile, NoiseLayer};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BlockType {
@@ -19,6 +18,15 @@ pub enum BlockType {
 pub struct Block {
     pub block_type: BlockType,
     pub biome_type: BiomeType,
+}
+
+impl Default for Block {
+    fn default() -> Self {
+        Block{
+            block_type:BlockType::Stone,
+            biome_type: BiomeType::Grassland,
+        }
+    }
 }
 
 pub struct Chunk {
@@ -37,10 +45,11 @@ impl Chunk {
     }
 
     pub fn new(position: IVec2) -> Self {
-        let elevation_noise = generate_noise(position, get_noise_profile(NoiseLayer::Elevation));
-        let humidity_noise = generate_noise(position, get_noise_profile(NoiseLayer::Humidity));
+        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).to_xyz().xy().as_ivec2();
+        let elevation_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Elevation));
+        let humidity_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Humidity));
         let temperature_noise =
-            generate_noise(position, get_noise_profile(NoiseLayer::Temperature));
+            generate_noise(xy_position, get_noise_profile(NoiseLayer::Temperature));
 
         let biomes = generate_biomes(humidity_noise, temperature_noise);
 

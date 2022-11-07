@@ -1,7 +1,6 @@
-use bevy::input::Input;
 use bevy::input::mouse::MouseMotion;
 use bevy::math::{Quat, Vec3};
-use bevy::prelude::{default, Camera3dBundle, Commands, Component, Query, Res, Time, Transform, EventReader, EulerRot, Bundle, Vec2, ResMut, Windows};
+use bevy::prelude::{ Camera3dBundle,  Component, Query, Res, Time, Transform, EventReader, EulerRot, Bundle, Vec2, ResMut, Windows};
 #[derive(Default, Component)]
 pub struct PlayerCamera {
     pub height:f32,
