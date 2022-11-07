@@ -1,10 +1,14 @@
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
 
-use crate::animate_simple::{RotateTag, RotAxis};
-use crate::game::hex_grid::{axial, chunk};
+use crate::animate_simple::{RotAxis, RotateTag};
 use crate::game::hex_grid::axial::Pos;
 use crate::game::hex_grid::chunk::Chunk;
+use crate::game::hex_grid::{axial, chunk};
+use crate::game::procedural_generation;
+use crate::game::procedural_generation::{
+    index_to_xyz, Chunks, CHUNK_DEPTH, CHUNK_HEIGHT, CHUNK_WIDTH,
+};
 
 /// For testing
 pub fn spawn_some_hexes(
@@ -38,6 +42,7 @@ pub fn spawn_random_chunk(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut std_mats: ResMut<Assets<StandardMaterial>>,
+    mut chunks: ResMut<Chunks>,
 ) {
     let chunk = Chunk::random();
     (0..chunk::CHUNK_DIMENSION_Z).for_each(|z| {
@@ -54,7 +59,7 @@ pub fn spawn_random_chunk(
                                 r as f32 / chunk::CHUNK_DIMENSION_R as f32,
                                 z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
                             )
-                                .into(),
+                            .into(),
                         ),
                         ..default()
                     });
@@ -62,6 +67,40 @@ pub fn spawn_random_chunk(
             });
         });
     });
+}
+
+pub fn spawn_chunk(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut std_mats: ResMut<Assets<StandardMaterial>>,
+    mut chunks: ResMut<Chunks>,
+) {
+    let chunk: &procedural_generation::Chunk;
+    if chunks.chunks.contains_key(&IVec2 { x: 0, y: 0 }) {
+        chunk = chunks.chunks.get(&IVec2 { x: 0, y: 0 }).unwrap();
+    } else {
+        chunks.generate_chunk(IVec2 { x: 0, y: 0 });
+        chunk = chunks.chunks.get(&IVec2 { x: 0, y: 0 }).unwrap();
+    }
+
+    for i in 0..chunk.blocks.len() {
+        if chunk.blocks[i].block_type == procedural_generation::BlockType::Stone {
+            let position = index_to_xyz(i);
+            commands.spawn_bundle(MaterialMeshBundle {
+                mesh: meshes.add(create_mesh()),
+                transform: Transform::from_translation(position.as_vec3()),
+                material: std_mats.add(
+                    Color::rgb(
+                        position.x as f32 / CHUNK_WIDTH as f32,
+                        position.y as f32 / CHUNK_HEIGHT as f32,
+                        position.z as f32 / CHUNK_DEPTH as f32,
+                    )
+                    .into(),
+                ),
+                ..default()
+            });
+        }
+    }
 }
 
 fn index(i: i8, local_index: i8) -> u32 {

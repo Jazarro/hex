@@ -1,3 +1,4 @@
+use bevy::app::CoreStage::{First, Update};
 use bevy::app::{App, Plugin};
 use bevy::pbr::{PointLight, PointLightBundle};
 use bevy::prelude::*;
@@ -10,15 +11,16 @@ use crate::game::camera::first_person::{
     cursor_grab, position_player_camera, rotate_player_camera, PlayerCamera,
 };
 use crate::game::meshes::debug_lines::apply_debug_lines;
-use crate::game::meshes::hexagon::spawn_random_chunk;
+use crate::game::meshes::hexagon::{spawn_chunk, spawn_random_chunk};
 use crate::game::movement::char_control::player_movement_system;
-use crate::game::procedural_generation::setup_chunks;
+use crate::game::procedural_generation::{setup_chunks, Chunks};
 use crate::states::appstate::AppState;
 
 pub struct GameState;
 
 impl Plugin for GameState {
     fn build(&self, app: &mut App) {
+        app.insert_resource(Chunks::default());
         app.add_enter_system_set(
             AppState::Game,
             ConditionSet::new()
@@ -26,11 +28,19 @@ impl Plugin for GameState {
                 .with_system(cursor_grab)
                 .with_system(setup_light)
                 .with_system(setup_player)
+                .with_system(spawn_chunk)
                 .with_system(apply_debug_lines)
-                .with_system(spawn_random_chunk)
-                .with_system(setup_chunks)
+                // .with_system(spawn_random_chunk)
                 .into(),
         )
+        // .add_stage_before(First, "spawn_chunk", SystemStage::parallel())
+        // .add_system_set_to_stage(
+        //     "spawn_chunk",
+        //     ConditionSet::new()
+        //         .run_in_state(AppState::Game)
+        //         .with_system(spawn_chunk)
+        //         .into(),
+        // )
         .add_system_set(
             ConditionSet::new()
                 .run_in_state(AppState::Game)

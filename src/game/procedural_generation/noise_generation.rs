@@ -156,3 +156,7 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
 
     noise
 }
+
+// References
+// Random Number Generator
+// 1. https://www.calculator.net/random-number-generator.html?clower=-100000&cupper=100000&cnums=10&cdup=n&csort=n&cnumt=i&cprec=50&ctype=2&s=84136.2214&submit1=Generate#comprehensive

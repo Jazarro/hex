@@ -2,20 +2,21 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 
 mod biomes;
-mod chunk;
+pub mod chunk;
 mod noise_generation;
 
 use biomes::*;
-use chunk::*;
+pub use chunk::*;
 use noise_generation::*;
 
 // x
-const CHUNK_WIDTH: usize = 32;
+pub const CHUNK_WIDTH: usize = 32;
 // y
-const CHUNK_HEIGHT: usize = 32;
+pub const CHUNK_HEIGHT: usize = 32;
 // z
-const CHUNK_DEPTH: usize = 64;
+pub const CHUNK_DEPTH: usize = 64;
 
+#[derive(Default)]
 pub struct Chunks {
     pub chunks: HashMap<IVec2, Chunk>,
 }
