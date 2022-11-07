@@ -3,11 +3,11 @@
 
 extern crate core;
 
+use crate::debug_window::DebugWindowPlugin;
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
-use bevy_inspector_egui::WorldInspectorPlugin;
-use iyes_loopless::prelude::AppLooplessStateExt;
+use iyes_loopless::prelude::{AppLooplessStateExt, CurrentState};
 
 use crate::game::meshes::debug_lines::LineMaterial;
 use crate::game::movement::input::read_movement_input;
@@ -15,12 +15,15 @@ use crate::game::movement::structs::MoveInput;
 use crate::states::appstate::AppState;
 use crate::states::state_game::GameState;
 use crate::states::state_loading::LoadingState;
+use crate::window_event_handler::handle_window;
 
 mod animate_simple;
 mod assets;
 mod audio;
+mod debug_window;
 mod game;
 mod states;
+mod window_event_handler;
 
 fn main() {
     let mut app = App::new();
@@ -43,12 +46,20 @@ fn main() {
     app.insert_resource(MoveInput::default());
     app.add_plugins(DefaultPlugins)
         .add_plugin(MaterialPlugin::<LineMaterial>::default())
-        .add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui
         .add_system(close_on_esc)
         // reading movement input here, in case we need it for things like UI navigation in menu - F
         .add_system(read_movement_input)
         .add_loopless_state(AppState::Loading)
         .add_plugin(LoadingState)
         .add_plugin(GameState)
+        .add_plugin(DebugWindowPlugin)
+        .add_system(handle_window)
+        .add_system(log_state_changes)
         .run();
+}
+
+pub fn log_state_changes(state: Res<CurrentState<AppState>>) {
+    if state.is_changed() {
+        info!("Switching to game state {:?}!", state.0);
+    }
 }
