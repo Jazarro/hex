@@ -1,64 +1,51 @@
 use bevy::input::Input;
+use bevy::input::mouse::MouseMotion;
 use bevy::math::{Quat, Vec3};
-use bevy::prelude::{
-    default, Camera3dBundle, Commands, Component, KeyCode, Query, Res, Time, Transform,
-};
-
-/// set up a simple 3D camera
-pub fn setup_camera(mut commands: Commands) {
-    // camera
-    commands
-        .spawn_bundle(Camera3dBundle {
-            // transform: Transform::from_xyz(200.0, 200.0, 100.0).looking_at(Vec3::ZERO, Vec3::Z),
-            // transform: Transform::from_xyz(20.0, 20.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
-            transform: Transform::from_xyz(1.0, 1.0, 20.0).looking_at(Vec3::ZERO, Vec3::Z),
-            ..default()
-        })
-        .insert(ActiveCamera::default());
+use bevy::prelude::{default, Camera3dBundle, Commands, Component, Query, Res, Time, Transform, EventReader, EulerRot, Bundle, Vec2, ResMut, Windows};
+#[derive(Default, Component)]
+pub struct PlayerCamera {
+    pub height:f32,
+    pub x_rot_max_deg:f32,
+    pub x_rot_speed:f32,
 }
 
-#[derive(Default, Component)]
-pub struct ActiveCamera {}
+#[derive(Bundle, Default)]
+pub struct PlayerCameraBundle {
+    pub player_cam: PlayerCamera,
+    #[bundle]
+    pub camera_3d: Camera3dBundle
+}
 
-pub fn move_camera(
-    time: Res<Time>,
-    keys: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Transform, &ActiveCamera)>,
-) {
-    let direction = Vec3::new(
-        if keys.any_pressed([KeyCode::A, KeyCode::Left]) {
-            -1.
-        } else if keys.any_pressed([KeyCode::D, KeyCode::Right]) {
-            1.
-        } else {
-            0.
-        },
-        if keys.any_pressed([KeyCode::S, KeyCode::Down]) {
-            1.
-        } else if keys.any_pressed([KeyCode::W, KeyCode::Up]) {
-            -1.
-        } else {
-            0.
-        },
-        if keys.any_pressed([KeyCode::LShift, KeyCode::C]) {
-            -1.
-        } else if keys.any_pressed([KeyCode::Space]) {
-            1.
-        } else {
-            0.
-        },
-    );
-    let rotation = if keys.pressed(KeyCode::Q) {
-        -1.
-    } else if keys.pressed(KeyCode::E) {
-        1.
-    } else {
-        0.
-    };
-    for (mut transform, _) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_z(rotation * time.delta_seconds()));
-        transform.translation.x += direction.x;
-        transform.translation.y += direction.y;
-        transform.translation.z += direction.z;
+
+// The camera rotates only on it's local X-axis. Z-axis rotation is deferred to player's body.
+// Player's body is the camera's parent.
+pub fn rotate_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>,
+                            mut mouse: EventReader<MouseMotion>, 
+                            time: Res<Time>){
+    if let Ok((mut tform, cam)) = q.get_single_mut() {
+        let mut mouse_mov = Vec2::ZERO;
+        let mut new_vel = Vec3::ZERO;
+        for ev in mouse.iter() {
+            mouse_mov += ev.delta;
+        }
+        let mut x_rot:f32 = tform.rotation.to_euler(EulerRot::XYZ).0;
+        x_rot += -mouse_mov.y * time.delta_seconds() * cam.x_rot_speed;
+        let max = cam.x_rot_max_deg.to_radians();
+        x_rot = x_rot.clamp(-max+1.5, max+1.5); // need to offset by 90deg, otherwise cam netural rot is looking downward.
+        tform.rotation = Quat::from_euler(EulerRot::XYZ, x_rot, 0.0, 0.0);
     }
+}
+
+pub fn position_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>){
+    if let Ok((mut tform, cam)) = q.get_single_mut() {
+        tform.translation = Vec3::new(0.0, 0.0, cam.height);
+    }
+}
+
+pub fn cursor_grab(
+    mut windows: ResMut<Windows>,
+) {
+    let window = windows.get_primary_mut().unwrap();
+    window.set_cursor_lock_mode(true);
+    window.set_cursor_visibility(false);
 }
