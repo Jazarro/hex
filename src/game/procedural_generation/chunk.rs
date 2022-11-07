@@ -1,4 +1,4 @@
-use crate::game::procedural_generation::xy_to_index;
+use crate::game::procedural_generation::{xy_to_index, xyz_to_index};
 use bevy::prelude::*;
 
 use super::{
@@ -6,19 +6,35 @@ use super::{
     CHUNK_DEPTH, CHUNK_HEIGHT, CHUNK_WIDTH,
 };
 
+#[derive(Clone, Copy, Debug)]
+pub enum BlockType {
+    Air,
+    Stone,
+    Dirt,
+    Grass,
+    Water,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Block {
+    pub block_type: BlockType,
+    pub biome_type: BiomeType,
+}
+
 pub struct Chunk {
-    blocks: Vec<Block>,
+    pub blocks: Vec<Block>,
 }
 
 impl Chunk {
-    pub fn get_block(position: IVec3) -> Block {
-        Block {
-            block_type: BlockType::Air,
-            biome_type: BiomeType::Forest,
-        }
+    pub fn get_block(&self, position: IVec3) -> Block {
+        let index = xyz_to_index(position);
+        self.blocks[index]
     }
 
-    pub fn set_block(position: IVec3) {}
+    pub fn set_block(&mut self, position: IVec3, block: Block) {
+        let index = xyz_to_index(position);
+        self.blocks[index] = block;
+    }
 
     pub fn new(position: IVec2) -> Self {
         let elevation_noise = generate_noise(position, get_noise_profile(NoiseLayer::Elevation));
@@ -53,19 +69,6 @@ impl Chunk {
 
         Chunk { blocks: Vec::new() }
     }
-}
-
-pub struct Block {
-    pub block_type: BlockType,
-    pub biome_type: BiomeType,
-}
-
-pub enum BlockType {
-    Air,
-    Stone,
-    Dirt,
-    Grass,
-    Water,
 }
 
 // References
