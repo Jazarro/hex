@@ -6,6 +6,11 @@ GameJam entry for the rad team
 
 To enable a second window with debug information, enable the 'debugwindow' feature. (`cargo run --features debugwindow`)
 
+# Reading / Research
+
+1. https://www.redblobgames.com/grids/hexagons/
+2. https://www.redblobgames.com/articles/noise/introduction.html
+
 # Tooling
 
 ## clippy
