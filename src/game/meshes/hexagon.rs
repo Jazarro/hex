@@ -3,7 +3,10 @@ use bevy::render::mesh::{Indices, PrimitiveTopology};
 
 use crate::animate_simple::{RotAxis, RotateTag};
 use crate::game::hex_grid::axial::Pos;
-use crate::game::hex_grid::chunk::Chunk;
+use crate::game::hex_grid::block::BlockType;
+use crate::game::hex_grid::chunk::{
+    Chunk, CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R, CHUNK_DIMENSION_Z,
+};
 use crate::game::hex_grid::{axial, chunk};
 
 /// For testing
@@ -40,10 +43,16 @@ pub fn spawn_chunk(
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
     let chunk = Chunk::new(IVec2::new(0, 0));
-    (0..chunk::CHUNK_DIMENSION_Z).for_each(|z| {
-        (0..chunk::CHUNK_DIMENSION_R).for_each(|r| {
-            (0..chunk::CHUNK_DIMENSION_Q).for_each(|q| {
+    for z in 0..CHUNK_DIMENSION_Z - 1 {
+        for r in 0..CHUNK_DIMENSION_R - 1 {
+            for q in 0..CHUNK_DIMENSION_Q - 1 {
                 let pos = Pos::new(q as f32, r as f32, z as f32);
+
+                let block = chunk.get(q, r, z);
+                if block.block_type == BlockType::Air {
+                    continue;
+                }
+
                 commands.spawn_bundle(MaterialMeshBundle {
                     mesh: meshes.add(create_mesh()),
                     transform: Transform::from_translation(pos.as_xyz()),
@@ -58,9 +67,9 @@ pub fn spawn_chunk(
                     ),
                     ..default()
                 });
-            });
-        });
-    });
+            }
+        }
+    }
 }
 
 /// For testing.

@@ -9,9 +9,9 @@ use crate::game::procedural_generation::noise_generation::{
     generate_noise, get_noise_profile, NoiseLayer,
 };
 
-pub const CHUNK_DIMENSION_Q: usize = 32;
-pub const CHUNK_DIMENSION_R: usize = 32;
-pub const CHUNK_DIMENSION_Z: usize = 64;
+pub const CHUNK_DIMENSION_Q: usize = 64;
+pub const CHUNK_DIMENSION_R: usize = 64;
+pub const CHUNK_DIMENSION_Z: usize = 16;
 
 pub struct Chunk {
     blocks: [[[Block; CHUNK_DIMENSION_Q]; CHUNK_DIMENSION_R]; CHUNK_DIMENSION_Z],
@@ -35,6 +35,7 @@ impl Chunk {
             .get(q)
             .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
     }
+
     pub fn set(&mut self, q: usize, r: usize, z: usize, block: Block) {
         *self
             .blocks
@@ -45,6 +46,7 @@ impl Chunk {
             .get_mut(q)
             .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z))) = block;
     }
+
     fn index_out_of_bounds(q: usize, r: usize, z: usize) -> String {
         format!(
             "Chunk lookup index out of bounds. Tried to access \
@@ -63,10 +65,29 @@ impl Chunk {
         let biomes = generate_biomes(humidity_noise, temperature_noise);
         let mut chunk = Chunk::default();
 
+        /////
+        let mut min_elevation = 0.0;
+        let mut max_elevation = 0.0;
+        for ele in elevation_noise.iter() {
+            if ele < &min_elevation {
+                min_elevation = *ele;
+            }
+            if ele > &max_elevation {
+                max_elevation = *ele;
+            }
+        }
+        println!(
+            "min elevation: {}, max elevation: {}",
+            min_elevation, max_elevation
+        );
+
+        /////
+
         for q in 0..CHUNK_DIMENSION_Q {
             for r in 0..CHUNK_DIMENSION_R {
                 let elevation = elevation_noise[qr_to_index(IPos::new(q as i32, r as i32, 0))];
                 let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_DIMENSION_Z as f64);
+                // println!("z_elevation: {}", z_elevation);
                 let biome_type = biomes[qr_to_index(IPos::new(q as i32, r as i32, 0))];
 
                 for z in 0..CHUNK_DIMENSION_Z {

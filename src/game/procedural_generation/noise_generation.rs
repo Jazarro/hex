@@ -19,8 +19,8 @@ pub struct NoiseProfile {
     pub lacunarity: f64,
     pub offset: Vec2,
     pub threshold: f64,
-    pub random_x_values: Vec<f64>,
-    pub random_y_values: Vec<f64>,
+    pub random_q_values: Vec<f64>,
+    pub random_r_values: Vec<f64>,
 }
 
 impl NoiseProfile {
@@ -31,8 +31,8 @@ impl NoiseProfile {
         lacunarity: f64,
         offset: Vec2,
         threshold: f64,
-        random_x_values: Vec<f64>,
-        random_y_values: Vec<f64>,
+        random_q_values: Vec<f64>,
+        random_r_values: Vec<f64>,
     ) -> Self {
         NoiseProfile {
             scale,
@@ -41,8 +41,8 @@ impl NoiseProfile {
             lacunarity,
             offset,
             threshold,
-            random_x_values,
-            random_y_values,
+            random_q_values,
+            random_r_values,
         }
     }
 }
@@ -50,10 +50,10 @@ impl NoiseProfile {
 pub fn get_noise_profile(noise_layer: NoiseLayer) -> NoiseProfile {
     match noise_layer {
         NoiseLayer::Elevation => NoiseProfile::new(
-            0.1,
-            4,
-            0.5,
-            2.0,
+            183.0,
+            5,
+            0.411,
+            2.61,
             Vec2::new(0.0, 0.0),
             0.5,
             vec![
@@ -66,10 +66,10 @@ pub fn get_noise_profile(noise_layer: NoiseLayer) -> NoiseProfile {
             ],
         ),
         NoiseLayer::Humidity => NoiseProfile::new(
-            0.1,
-            4,
-            0.5,
-            2.0,
+            150.0,
+            3,
+            0.161,
+            2.42,
             Vec2::new(0.0, 0.0),
             0.5,
             vec![
@@ -82,10 +82,10 @@ pub fn get_noise_profile(noise_layer: NoiseLayer) -> NoiseProfile {
             ],
         ),
         NoiseLayer::Temperature => NoiseProfile::new(
-            0.1,
-            4,
-            0.5,
-            2.0,
+            227.0,
+            3,
+            0.13,
+            4.09,
             Vec2::new(0.0, 0.0),
             0.5,
             vec![
@@ -110,14 +110,14 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
     let lacunarity = profile.lacunarity;
     let offset = profile.offset;
     let threshold = profile.threshold;
-    let random_x_values = profile.random_x_values;
-    let random_y_values = profile.random_y_values;
+    let random_q_values = profile.random_q_values;
+    let random_r_values = profile.random_r_values;
 
     let mut octave_offsets: Vec<Vec2> = Vec::new();
     for i in 0..octaves {
-        let x_offset = random_x_values[i as usize] + offset.x as f64;
-        let y_offset = random_y_values[i as usize] + offset.y as f64;
-        let offset = Vec2::new(x_offset as f32, y_offset as f32);
+        let q_offset = random_q_values[i as usize] + offset.x as f64;
+        let r_offset = random_r_values[i as usize] + offset.y as f64;
+        let offset = Vec2::new(q_offset as f32, r_offset as f32);
         octave_offsets.push(offset);
     }
 
@@ -127,22 +127,23 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
 
     let half_width = CHUNK_DIMENSION_Q as f64 / 2.0;
     let half_height = CHUNK_DIMENSION_R as f64 / 2.0;
+    let mut row_offset = 0.0;
 
-    for y in 0..CHUNK_DIMENSION_R {
-        for x in 0..CHUNK_DIMENSION_Q {
+    for r in 0..CHUNK_DIMENSION_R {
+        for q in 0..CHUNK_DIMENSION_Q {
             let mut amplitude: f64 = 1.0;
             let mut frequency: f64 = 1.0;
             let mut noise_value: f64 = 0.0;
 
             for i in 0..octaves {
-                let mut x_sample = x as f64 + position.x as f64; // * CHUNK_WIDTH ???
-                let mut y_sample = y as f64 + position.y as f64; // * CHUNK_HEIGHT ???
-                x_sample = (x_sample - half_width) / scale * frequency
+                let mut q_sample = q as f64 + row_offset as f64 + position.x as f64; // * CHUNK_WIDTH ???
+                let mut r_sample = r as f64 + position.y as f64; // * CHUNK_HEIGHT ???
+                q_sample = (q_sample - half_width) / scale * frequency
                     + octave_offsets[i as usize].x as f64;
-                y_sample = (y_sample - half_height) / scale * frequency
+                r_sample = (r_sample - half_height) / scale * frequency
                     + octave_offsets[i as usize].y as f64;
 
-                let noise_sample = open_simplex.get([x_sample, y_sample, 0.0]);
+                let noise_sample = open_simplex.get([q_sample, r_sample, 0.0]);
 
                 noise_value += noise_sample * amplitude;
                 amplitude *= persistence;
@@ -151,6 +152,7 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
 
             noise.push(noise_value);
         }
+        row_offset += 0.5;
     }
 
     noise
