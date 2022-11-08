@@ -45,7 +45,7 @@ impl Chunk {
     }
 
     pub fn new(position: IVec2) -> Self {
-        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).to_xyz().xy().as_ivec2();
+        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).as_xyz().xy().as_ivec2();
         let elevation_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Elevation));
         let humidity_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Humidity));
         let temperature_noise =

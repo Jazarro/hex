@@ -19,7 +19,7 @@ pub fn spawn_some_hexes(
             commands
                 .spawn_bundle(MaterialMeshBundle {
                     mesh: meshes.add(create_mesh()),
-                    transform: Transform::from_translation(pos.to_xyz()),
+                    transform: Transform::from_translation(pos.as_xyz()),
                     material: std_mats.add(
                         Color::rgb(0.5, x as f32 / length as f32, y as f32 / width as f32).into(),
                     ),
@@ -47,7 +47,7 @@ pub fn spawn_random_chunk(
                     let pos = Pos::new(q as f32, r as f32, z as f32);
                     commands.spawn_bundle(MaterialMeshBundle {
                         mesh: meshes.add(create_mesh()),
-                        transform: Transform::from_translation(pos.to_xyz()),
+                        transform: Transform::from_translation(pos.as_xyz()),
                         material: std_mats.add(
                             // Color::rgb(
                             //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,

@@ -64,7 +64,7 @@ impl Chunk {
         chunk
     }
     pub fn new(position: IVec2) -> Self {
-        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).to_xyz().xy().as_ivec2();
+        let xy_position = Pos::new(position.x as f32, position.y as f32, 0.).as_xyz().xy().as_ivec2();
         let elevation_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Elevation));
         let humidity_noise = generate_noise(xy_position, get_noise_profile(NoiseLayer::Humidity));
         let temperature_noise =
@@ -75,14 +75,13 @@ impl Chunk {
 
         for q in 0..CHUNK_DIMENSION_Q {
             for r in 0..CHUNK_DIMENSION_R {
-                let xy = Pos::new(q as f32, r as f32, 0.).to_xyz().xy().as_ivec2();
+                let xy = Pos::new(q as f32, r as f32, 0.).as_xyz().xy().as_ivec2();
                 let elevation = elevation_noise[xy_to_index(xy)];
-
+                let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_DIMENSION_Z as f64);
                 let biome_type = biomes[xy_to_index(xy)];
 
                 for z in 0..CHUNK_DIMENSION_Z {
                     let block_type: BlockType;
-                    let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_DIMENSION_Z as f64);
                     if z < z_elevation as usize {
                         block_type = BlockType::Stone;
                     } else {

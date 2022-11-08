@@ -1,7 +1,6 @@
 use bevy::math::{IVec2, IVec3};
-use bevy::prelude::Commands;
 use bevy::utils::HashMap;
-use crate::game::procedural_generation::block::Chunk;
+use crate::game::hex_grid::chunk::Chunk;
 
 // x
 pub const CHUNK_WIDTH: usize = 32;
@@ -24,13 +23,6 @@ impl Chunks {
     pub fn load_chunk_from_disk(position: IVec2) {}
 
     pub fn save_chunk_to_disk(position: IVec2) {}
-}
-
-pub fn setup_chunks(mut commands: Commands) {
-    let chunks = Chunks {
-        chunks: Default::default(),
-    };
-    commands.insert_resource(chunks);
 }
 
 pub fn xy_to_index(position: IVec2) -> usize {
