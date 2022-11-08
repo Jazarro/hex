@@ -34,7 +34,7 @@ pub fn spawn_some_hexes(
 }
 
 /// For testing.
-pub fn spawn_random_chunk(
+pub fn spawn_chunk(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut std_mats: ResMut<Assets<StandardMaterial>>,
@@ -43,23 +43,51 @@ pub fn spawn_random_chunk(
     (0..chunk::CHUNK_DIMENSION_Z).for_each(|z| {
         (0..chunk::CHUNK_DIMENSION_R).for_each(|r| {
             (0..chunk::CHUNK_DIMENSION_Q).for_each(|q| {
-                if chunk.get(q, r, z).is_some() {
-                    let pos = Pos::new(q as f32, r as f32, z as f32);
-                    commands.spawn_bundle(MaterialMeshBundle {
-                        mesh: meshes.add(create_mesh()),
-                        transform: Transform::from_translation(pos.as_xyz()),
-                        material: std_mats.add(
-                            // Color::rgb(
-                            //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
-                            //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
-                            //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
-                            // )
-                            // .into(),
-                            Color::WHITE.into(),
-                        ),
-                        ..default()
-                    });
-                }
+                let pos = Pos::new(q as f32, r as f32, z as f32);
+                commands.spawn_bundle(MaterialMeshBundle {
+                    mesh: meshes.add(create_mesh()),
+                    transform: Transform::from_translation(pos.as_xyz()),
+                    material: std_mats.add(
+                        // Color::rgb(
+                        //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
+                        //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
+                        //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
+                        // )
+                        // .into(),
+                        Color::WHITE.into(),
+                    ),
+                    ..default()
+                });
+            });
+        });
+    });
+}
+
+/// For testing.
+pub fn spawn_random_chunk(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut std_mats: ResMut<Assets<StandardMaterial>>,
+) {
+    let chunk = Chunk::random();
+    (0..chunk::CHUNK_DIMENSION_Z).for_each(|z| {
+        (0..chunk::CHUNK_DIMENSION_R).for_each(|r| {
+            (0..chunk::CHUNK_DIMENSION_Q).for_each(|q| {
+                let pos = Pos::new(q as f32, r as f32, z as f32);
+                commands.spawn_bundle(MaterialMeshBundle {
+                    mesh: meshes.add(create_mesh()),
+                    transform: Transform::from_translation(pos.as_xyz()),
+                    material: std_mats.add(
+                        // Color::rgb(
+                        //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
+                        //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
+                        //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
+                        // )
+                        // .into(),
+                        Color::WHITE.into(),
+                    ),
+                    ..default()
+                });
             });
         });
     });

@@ -1,4 +1,4 @@
-use crate::game::hex_grid::chunks::{CHUNK_HEIGHT, CHUNK_WIDTH};
+use crate::game::hex_grid::chunk::{CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R};
 use bevy::prelude::*;
 use noise::{NoiseFn, OpenSimplex};
 
@@ -125,11 +125,11 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
         scale = 0.0001;
     }
 
-    let half_width = CHUNK_WIDTH as f64 / 2.0;
-    let half_height = CHUNK_HEIGHT as f64 / 2.0;
+    let half_width = CHUNK_DIMENSION_Q as f64 / 2.0;
+    let half_height = CHUNK_DIMENSION_R as f64 / 2.0;
 
-    for y in 0..CHUNK_HEIGHT {
-        for x in 0..CHUNK_WIDTH {
+    for y in 0..CHUNK_DIMENSION_R {
+        for x in 0..CHUNK_DIMENSION_Q {
             let mut amplitude: f64 = 1.0;
             let mut frequency: f64 = 1.0;
             let mut noise_value: f64 = 0.0;
