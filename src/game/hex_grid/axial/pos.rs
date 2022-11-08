@@ -28,7 +28,7 @@ const QR_PER_Y: Vec2 = Vec2::new(0., SQRT_THREE / 3.);
 /// A hexagonal coordinate in the flat-topped axial coordinate system.
 /// This is the floating-point version. There is also an integral version.
 /// For more information, see https://www.redblobgames.com/grids/hexagons/
-#[derive(Deserialize, Serialize, Default, Copy, Clone, Debug, PartialEq, )]
+#[derive(Deserialize, Serialize, Default, Copy, Clone, Debug, PartialEq)]
 pub struct Pos(pub(crate) Vec3);
 
 /// TODO: Use matrix calculation instead?
@@ -70,7 +70,11 @@ impl Pos {
     /// its components.
     #[must_use]
     pub fn as_ipos_ceil(&self) -> IPos {
-        IPos::new(self.q().ceil() as i32, self.r().ceil() as i32, self.z().ceil() as i32)
+        IPos::new(
+            self.q().ceil() as i32,
+            self.r().ceil() as i32,
+            self.z().ceil() as i32,
+        )
     }
     /// Convert to the integer version of this struct by rounding to the nearest integral hex.
     /// Note that this is not the same as rounding each of its components!
@@ -109,7 +113,6 @@ impl Pos {
         delta.q().max(delta.r()).max(delta.z())
     }
 }
-
 
 /// Order by q first, then r, then z.
 ///

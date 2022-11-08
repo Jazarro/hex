@@ -1,6 +1,6 @@
+use crate::game::hex_grid::chunk::Chunk;
 use bevy::math::{IVec2, IVec3};
 use bevy::utils::HashMap;
-use crate::game::hex_grid::chunk::Chunk;
 
 // x
 pub const CHUNK_WIDTH: usize = 32;

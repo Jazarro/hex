@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
 
-use crate::animate_simple::{RotateTag, RotAxis};
-use crate::game::hex_grid::{axial, chunk};
+use crate::animate_simple::{RotAxis, RotateTag};
 use crate::game::hex_grid::axial::Pos;
 use crate::game::hex_grid::chunk::Chunk;
+use crate::game::hex_grid::{axial, chunk};
 
 /// For testing
 pub fn spawn_some_hexes(
@@ -39,7 +39,7 @@ pub fn spawn_random_chunk(
     mut meshes: ResMut<Assets<Mesh>>,
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
-    let chunk = Chunk::new(IVec2::new(0,0));
+    let chunk = Chunk::new(IVec2::new(0, 0));
     (0..chunk::CHUNK_DIMENSION_Z).for_each(|z| {
         (0..chunk::CHUNK_DIMENSION_R).for_each(|r| {
             (0..chunk::CHUNK_DIMENSION_Q).for_each(|q| {

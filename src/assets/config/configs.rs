@@ -49,7 +49,7 @@ impl MergingAsset for Config {
             Config::Keys(value) => {
                 if let Some(Config::Keys(accumulator)) = accumulator {
                     Config::Keys(value.merge(Some(accumulator)))
-                } else if let None = accumulator {
+                } else if accumulator.is_none() {
                     Config::Keys(value.merge(None))
                 } else {
                     panic!(

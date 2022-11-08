@@ -10,9 +10,11 @@ use crate::states::state_loading::LoadProcess;
 pub fn load_mod_order(mut commands: Commands, server: Res<AssetServer>) {
     info!("Loading mod_order.meta.ron");
     info!("Loading file_structure.meta.ron");
-    let mut handles = LoaderHandles::default();
-    handles.mod_order = server.load("mod_order.meta.ron");
-    handles.file_structure = server.load("file_structure.meta.ron");
+    let handles = LoaderHandles {
+        mod_order: server.load("mod_order.meta.ron"),
+        file_structure: server.load("file_structure.meta.ron"),
+        ..default()
+    };
     commands.insert_resource(handles);
     commands.insert_resource(NextState(LoadProcess::WaitForModOrder));
 }
@@ -52,7 +54,6 @@ pub fn load_manifests(
     info!("Loading mod manifests...");
     let mod_order = assets.get(&handles.mod_order);
     let mod_order = mod_order
-        .as_deref()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order();
     for mod_name in mod_order.mods.iter() {
@@ -71,17 +72,24 @@ pub fn check_manifests_are_present(
     server: Res<AssetServer>,
     mut assets: ResMut<Assets<MetaAsset>>,
 ) {
-    let mut mod_order = assets.get_mut(&handles.mod_order);
+    let mod_order = assets.get_mut(&handles.mod_order);
     let mod_order = mod_order
-        .as_deref_mut()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order_mut();
     let all_finished = handles.manifests.keys().fold(true, |acc, mod_name| {
         match server.get_load_state(handles.manifests.get(mod_name).unwrap()) {
             LoadState::Loaded => acc,
             LoadState::Failed => {
-                error!("Failed to load a {}'s mod manifest, skipping that mod...", mod_name);
-                if let Some((index, _)) = mod_order.mods.iter().enumerate().find(|(_, item)| item == &mod_name) {
+                error!(
+                    "Failed to load a {}'s mod manifest, skipping that mod...",
+                    mod_name
+                );
+                if let Some((index, _)) = mod_order
+                    .mods
+                    .iter()
+                    .enumerate()
+                    .find(|(_, item)| item == &mod_name)
+                {
                     mod_order.mods.remove(index);
                 }
                 acc
@@ -102,18 +110,16 @@ pub fn load_files(
 ) {
     let mod_order = assets.get(&handles.mod_order);
     let mod_order = mod_order
-        .as_deref()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order();
     let file_structure = assets.get(&handles.file_structure);
     let file_structure = file_structure
-        .as_deref()
         .expect("file_structure.meta.ron wasn't loaded (yet)!")
         .as_file_structure();
     for mod_name in mod_order.mods.iter() {
         for filename in file_structure.configs.iter() {
             let path = format!("{}/{}", mod_name, filename);
-            if let Ok(_) = server.asset_io().get_metadata((&path).as_ref()) {
+            if server.asset_io().get_metadata((path).as_ref()).is_ok() {
                 // Path must exist, so we'll try to load it.
                 handles.put_config(filename, server.load(&path));
             }
@@ -147,12 +153,10 @@ pub fn resolve_mods(
 ) {
     let mod_order = meta_assets.get(&handles.mod_order);
     let mod_order = mod_order
-        .as_deref()
         .expect("mod_order.meta.ron wasn't loaded (yet)!")
         .as_mod_order();
     let file_structure = meta_assets.get(&handles.file_structure);
     let file_structure = file_structure
-        .as_deref()
         .expect("file_structure.meta.ron wasn't loaded (yet)!")
         .as_file_structure();
     for config_type in file_structure.configs.iter() {
@@ -161,7 +165,7 @@ pub fn resolve_mods(
             .get(config_type)
             .unwrap()
             .iter()
-            .map(|handle| Some(handle))
+            .map(Some)
             .fold(None, |acc, handle| {
                 let config = configs
                     .get(handle.unwrap())

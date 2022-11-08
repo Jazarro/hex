@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#![allow(dead_code, unused_variables)]
+#![allow(dead_code, unused_variables, clippy::type_complexity)]
 
 extern crate core;
 
@@ -53,10 +53,10 @@ fn main() {
         .add_plugin(GameState)
         .add_system(handle_window)
         .add_system(log_state_changes);
-        // Show debug window only if the debugwindow feature is enabled:
-        #[cfg(feature = "debugwindow")]
-        app.add_plugin(DebugWindowPlugin);
-        app.run();
+    // Show debug window only if the debugwindow feature is enabled:
+    #[cfg(feature = "debugwindow")]
+    app.add_plugin(DebugWindowPlugin);
+    app.run();
 }
 
 pub fn log_state_changes(state: Res<CurrentState<AppState>>) {

@@ -14,9 +14,9 @@ pub struct KeysConfig {
 impl MergingAsset for KeysConfig {
     fn merge(&self, accumulator: Option<KeysConfig>) -> KeysConfig {
         if let Some(accumulator) = accumulator {
-            let mut merged = accumulator.clone();
+            let mut accumulator = accumulator;
             for (key, value) in self.map.iter() {
-                let updated = merged.map.insert(key.clone(), value.clone());
+                let updated = accumulator.map.insert(key.clone(), value.clone());
                 if updated.is_some() {
                     info!(
                         "A mod updated key config for {:?}, new value is {:?}",
@@ -24,7 +24,7 @@ impl MergingAsset for KeysConfig {
                     );
                 }
             }
-            merged
+            accumulator
         } else {
             info!("Loading default key configs: {:?}", self.map);
             self.clone()

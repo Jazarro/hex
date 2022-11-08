@@ -57,11 +57,23 @@ pub fn animate_sun(
 ) {
     day_night.timer.tick(time.delta());
     for (mut transform, mut light, sun) in query.iter_mut() {
-        light.illuminance = day_night.illuminance.clamped_sample(day_night.timer.percent()).unwrap();
+        light.illuminance = day_night
+            .illuminance
+            .clamped_sample(day_night.timer.percent())
+            .unwrap();
         light.color = Color::rgb(
-            day_night.redness.clamped_sample(day_night.timer.percent()).unwrap(),
-            day_night.greenness.clamped_sample(day_night.timer.percent()).unwrap(),
-            day_night.blueness.clamped_sample(day_night.timer.percent()).unwrap(),
+            day_night
+                .redness
+                .clamped_sample(day_night.timer.percent())
+                .unwrap(),
+            day_night
+                .greenness
+                .clamped_sample(day_night.timer.percent())
+                .unwrap(),
+            day_night
+                .blueness
+                .clamped_sample(day_night.timer.percent())
+                .unwrap(),
         );
         let radius = 500.;
         let angle = (day_night.timer.percent() - 0.25) * std::f32::consts::TAU;

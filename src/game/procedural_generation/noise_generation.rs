@@ -1,6 +1,6 @@
+use crate::game::hex_grid::chunks::{CHUNK_HEIGHT, CHUNK_WIDTH};
 use bevy::prelude::*;
 use noise::{NoiseFn, OpenSimplex};
-use crate::game::hex_grid::chunks::{CHUNK_HEIGHT, CHUNK_WIDTH};
 
 const SEED: u32 = 123456789;
 

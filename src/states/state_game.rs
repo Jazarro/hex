@@ -6,10 +6,12 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::animate_simple::rotate;
 use crate::game::actors::player::setup_player;
-use crate::game::camera::first_person::{cursor_grab, PlayerCamera, position_player_camera, rotate_player_camera};
+use crate::game::camera::first_person::{
+    cursor_grab, position_player_camera, rotate_player_camera, PlayerCamera,
+};
 use crate::game::meshes::debug_lines::spawn_debug_lines;
 
-use crate::game::hex_grid::chunks::{Chunks,};
+use crate::game::hex_grid::chunks::Chunks;
 use crate::game::meshes::hexagon::spawn_random_chunk;
 use crate::game::meshes::sun::{animate_sun, spawn_sun};
 use crate::game::movement::char_control::player_movement_system;
@@ -65,7 +67,7 @@ fn setup_light(mut commands: Commands) {
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 15_0_000.0,
+            intensity: 150_000.0,
             shadows_enabled: true,
             range: 1000.,
             ..default()
