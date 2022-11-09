@@ -1,21 +1,25 @@
-use crate::game::actors::structs::Player;
-use crate::game::camera::first_person::PlayerCamera;
-use crate::game::movement::structs::{MoveParams, MoveState};
-use crate::{EulerRot, MoveInput};
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::{
     Camera, EventReader, Quat, Query, Res, Time, Transform, Vec2, Vec3, With, Without,
 };
 
+use crate::assets::config::config_keys::{InputHandler, KeyBinding};
+use crate::game::actors::structs::Player;
+use crate::game::camera::first_person::PlayerCamera;
+use crate::game::movement::direction::Direction1D;
+use crate::game::movement::structs::{MoveParams, MoveState};
+use crate::{EulerRot, MoveInput};
+
 pub fn player_movement_system(
     mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,
     cam_q: Query<&Transform, (With<Camera>, With<PlayerCamera>, Without<Player>)>,
-    input: Res<MoveInput>,
+    input: InputHandler,
     mut mouse: EventReader<MouseMotion>,
     time: Res<Time>,
 ) {
     if let Ok((mut move_state, move_params, mut tform)) = q.get_single_mut() {
         if let Ok(cam_tform) = cam_q.get_single() {
+            let move_input = read_movement_input(&input);
             let dt = time.delta_seconds();
             let mut mouse_mov = Vec2::ZERO;
             for ev in mouse.iter() {
@@ -26,7 +30,7 @@ pub fn player_movement_system(
 
             move_state.velocity = if move_params.flying {
                 flying_movement(
-                    &input,
+                    &move_input,
                     &move_params,
                     &move_state,
                     tform.rotation,
@@ -34,7 +38,7 @@ pub fn player_movement_system(
                     dt,
                 )
             } else {
-                walking_movement(&input, &move_params, &move_state, tform.rotation, dt)
+                walking_movement(&move_input, &move_params, &move_state, tform.rotation, dt)
             };
 
             let mut mov = tform.translation;
@@ -90,19 +94,13 @@ fn flying_movement(
     dt: f32,
 ) -> Vec3 {
     let mut vel = move_state.velocity;
-    let mut input_dir = input.xy_plane.extend(0.0);
     let mut max_speed = move_params.max_speed;
-    if input.fast_held {
+    if input.sprint {
         max_speed *= move_params.boost_mod;
     }
     cam_rot *= Quat::from_euler(EulerRot::XYZ, -1.5, 0.0, 0.0);
-    input_dir = cam_rot * input_dir;
-    if input.up_held {
-        input_dir.z += 1.0;
-    }
-    if input.down_held {
-        input_dir.z -= 1.0;
-    }
+    let mut input_dir = cam_rot * input.xy_plane.extend(0.0);
+    input_dir.z = input.up_down.signum();
     input_dir = input_dir.normalize_or_zero();
     if input_dir.length_squared() < 0.01 {
         // No input, decay velocity.
@@ -115,7 +113,7 @@ fn flying_movement(
         let accel_vector = body_rot * (input_dir * move_params.accel);
         // Boost acceleration for vectors countering current velocity.
         let mut accel_mod: f32 = 1.0;
-        if input.fast_held {
+        if input.sprint {
             accel_mod *= move_params.boost_mod;
         }
         if vel.length_squared() > 0.0 {
@@ -130,4 +128,21 @@ fn flying_movement(
 
 fn remap(source: f32, source_from: f32, source_to: f32, target_from: f32, target_to: f32) -> f32 {
     target_from + (source - source_from) * (target_to - target_from) / (source_to / source_from)
+}
+
+pub fn read_movement_input(input_handler: &InputHandler) -> MoveInput {
+    let left = input_handler.is_active(&KeyBinding::Left);
+    let right = input_handler.is_active(&KeyBinding::Right);
+    let backward = input_handler.is_active(&KeyBinding::Backward);
+    let forward = input_handler.is_active(&KeyBinding::Forward);
+    let down = input_handler.is_active(&KeyBinding::Down);
+    let up = input_handler.is_active(&KeyBinding::Up);
+    MoveInput {
+        xy_plane: Vec2::new(
+            Direction1D::from_input(left, right).signum(),
+            Direction1D::from_input(backward, forward).signum(),
+        ),
+        up_down: Direction1D::from_input(down, up),
+        sprint: input_handler.is_active(&KeyBinding::Sprint),
+    }
 }

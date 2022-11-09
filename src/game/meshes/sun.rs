@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use splines::Spline;
 
+use crate::assets::config::config_keys::{InputHandler, KeyBinding};
 use crate::assets::config::config_world::WorldConfig;
 use crate::game::meshes::hexagon::create_single_block_mesh;
 
@@ -33,6 +34,7 @@ pub fn spawn_sun(
             });
         });
     commands.insert_resource(DayNight {
+        paused: false,
         timer: Timer::from_seconds(config.daynight_duration_seconds, true),
         illuminance: config.illuminance(),
         redness: config.redness(),
@@ -42,11 +44,18 @@ pub fn spawn_sun(
 }
 
 pub struct DayNight {
+    pub paused: bool,
     pub timer: Timer,
     pub illuminance: Spline<f32, f32>,
     pub redness: Spline<f32, f32>,
     pub greenness: Spline<f32, f32>,
     pub blueness: Spline<f32, f32>,
+}
+
+pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNight>) {
+    if input.is_active(&KeyBinding::PauseTime) {
+        day_night.paused ^= true;
+    }
 }
 
 pub fn animate_sun(
@@ -55,6 +64,9 @@ pub fn animate_sun(
     mut day_night: ResMut<DayNight>,
     mut query: Query<(&mut Transform, &mut DirectionalLight, &Sun)>,
 ) {
+    if day_night.paused {
+        return;
+    }
     day_night.timer.tick(time.delta());
     for (mut transform, mut light, sun) in query.iter_mut() {
         light.illuminance = day_night

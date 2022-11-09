@@ -1,6 +1,8 @@
 use bevy::math::{Vec2, Vec3};
 use bevy::prelude::Component;
 
+use crate::game::movement::direction::Direction1D;
+
 #[derive(Component, Default)]
 pub struct MoveState {
     pub velocity: Vec3,
@@ -20,10 +22,6 @@ pub struct MoveParams {
 #[derive(Default)]
 pub struct MoveInput {
     pub xy_plane: Vec2,
-    pub up_just_pressed: bool,
-    pub up_held: bool,
-    pub down_just_pressed: bool,
-    pub down_held: bool,
-    pub fast_just_pressed: bool,
-    pub fast_held: bool,
+    pub up_down: Direction1D,
+    pub sprint: bool,
 }

@@ -13,7 +13,7 @@ use crate::game::meshes::debug_lines::spawn_debug_lines;
 
 use crate::game::hex_grid::chunks::Chunks;
 use crate::game::meshes::hexagon::spawn_chunk_new;
-use crate::game::meshes::sun::{animate_sun, spawn_sun};
+use crate::game::meshes::sun::{animate_sun, process_day_night_input, spawn_sun};
 use crate::game::movement::char_control::player_movement_system;
 use crate::states::appstate::AppState;
 
@@ -37,6 +37,7 @@ impl Plugin for GameState {
         .add_system_set(
             ConditionSet::new()
                 .run_in_state(AppState::Game)
+                .with_system(process_day_night_input)
                 .with_system(animate_sun)
                 .with_system(rotate)
                 .with_system(player_movement_system)

@@ -167,9 +167,11 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_pos: &IPos) -> Mesh {
             }
         }
     }
-    info!(
-        "Spawned chunk {:?} with {} vertices and {} indices.",
-        chunk_pos,
+    debug!(
+        "Spawned chunk ({},{},{}) with {} vertices and {} indices.",
+        chunk_pos.q(),
+        chunk_pos.r(),
+        chunk_pos.z(),
         vertices.len(),
         indices.len()
     );
