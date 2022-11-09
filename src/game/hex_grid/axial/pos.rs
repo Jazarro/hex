@@ -12,6 +12,8 @@ pub const HEIGHT: f32 = 1.;
 pub const RADIUS: f32 = 0.6;
 /// The square root of three. Precalculated for performance and ease of use.
 const SQRT_THREE: f32 = 1.7320508;
+/// One sixth Tau or one third Pi. Convenience constant because Tau is just nicer.
+pub const FRAC_TAU_6: f32 = std::f32::consts::FRAC_PI_3;
 /// Distance away from the origin in a regular 'square' coordinate system for every 1m distance
 /// along the q-axis in the flat-topped axial coordinate system.
 const XY_PER_Q: Vec2 = Vec2::new(3. / 2., SQRT_THREE / 2.);

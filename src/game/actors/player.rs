@@ -21,7 +21,7 @@ pub fn setup_player(mut cmd: Commands) {
             turn_speed: 0.15,
             flying: true,
         },
-        transfrom: TransformBundle::from_transform(Transform::from_xyz(1.0, 1.0, 12.0)),
+        transform: TransformBundle::from_transform(Transform::from_xyz(1.0, 1.0, 12.0)),
         ..Default::default()
     })
     .with_children(|parent| {

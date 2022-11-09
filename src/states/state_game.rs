@@ -12,7 +12,7 @@ use crate::game::camera::first_person::{
 use crate::game::meshes::debug_lines::spawn_debug_lines;
 
 use crate::game::hex_grid::chunks::Chunks;
-use crate::game::meshes::hexagon::{spawn_chunk, spawn_random_chunk};
+use crate::game::meshes::hexagon::spawn_chunk_new;
 use crate::game::meshes::sun::{animate_sun, spawn_sun};
 use crate::game::movement::char_control::player_movement_system;
 use crate::states::appstate::AppState;
@@ -30,8 +30,8 @@ impl Plugin for GameState {
                 .with_system(spawn_sun)
                 .with_system(setup_player)
                 .with_system(spawn_debug_lines)
-                .with_system(spawn_chunk)
-                // .with_system(spawn_random_chunk)
+                // .with_system(spawn_chunk)
+                .with_system(spawn_chunk_new)
                 .into(),
         )
         .add_system_set(

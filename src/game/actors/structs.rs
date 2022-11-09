@@ -14,5 +14,5 @@ pub struct PlayerBundle {
     pub(crate) move_params: MoveParams,
     pub(crate) move_state: MoveState,
     #[bundle]
-    pub transfrom: TransformBundle,
+    pub transform: TransformBundle,
 }

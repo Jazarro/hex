@@ -1,18 +1,50 @@
-use crate::game::hex_grid::axial::IPos;
 use bevy::math::IVec2;
 use bevy::utils::HashMap;
 
-use crate::game::hex_grid::chunk::{Chunk, CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R};
+use crate::game::hex_grid::axial::IPos;
+use crate::game::hex_grid::block::Block;
+use crate::game::hex_grid::chunk::{
+    Chunk, CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R, CHUNK_DIMENSION_Z,
+};
 
 #[derive(Default)]
 pub struct Chunks {
-    pub chunks: HashMap<IVec2, Chunk>,
+    pub chunks: HashMap<IPos, Chunk>,
 }
 
 impl Chunks {
-    pub fn generate_chunk(&mut self, position: IVec2) {
-        let chunk = Chunk::new(position);
+    pub fn pos_block_to_chunk(pos: &IPos) -> IPos {
+        let pos_f = pos.as_pos();
+        IPos::new(
+            (pos_f.q() / CHUNK_DIMENSION_Q as f32).floor() as i32,
+            (pos_f.r() / CHUNK_DIMENSION_R as f32).floor() as i32,
+            (pos_f.z() / CHUNK_DIMENSION_Z as f32).floor() as i32,
+        )
+    }
+    pub fn get(&self, pos: &IPos) -> Option<Block> {
+        // TODO:...
+        None
+    }
+    /// pos: An absolute position.
+    pub fn is_solid(&self, pos_absolute: &IPos) -> bool {
+        let pos_relative = IPos::new(
+            pos_absolute.q().rem_euclid(CHUNK_DIMENSION_Q as i32),
+            pos_absolute.r().rem_euclid(CHUNK_DIMENSION_R as i32),
+            pos_absolute.z().rem_euclid(CHUNK_DIMENSION_Z as i32),
+        );
+        self.chunks
+            .get(&Self::pos_block_to_chunk(&pos_absolute))
+            .map(|chunk| chunk.get(&pos_relative).is_solid())
+            .unwrap_or(false)
+    }
+
+    pub fn generate_chunk(&mut self, position: IPos) {
+        let chunk = Chunk::new(IVec2::new(position.q(), position.r()));
         self.chunks.insert(position, chunk);
+    }
+
+    pub fn get_chunk(&self, position: &IPos) -> &Chunk {
+        &self.chunks.get(position).unwrap()
     }
 
     pub fn load_chunk_from_disk(position: IVec2) {}

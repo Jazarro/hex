@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use splines::Spline;
 
 use crate::assets::config::config_world::WorldConfig;
-use crate::game::meshes::hexagon::create_mesh;
+use crate::game::meshes::hexagon::create_single_block_mesh;
 
 #[derive(Component, Default)]
 pub struct Sun {}
@@ -26,7 +26,7 @@ pub fn spawn_sun(
         .insert(Sun::default())
         .with_children(|parent| {
             parent.spawn_bundle(MaterialMeshBundle {
-                mesh: meshes.add(create_mesh()),
+                mesh: meshes.add(create_single_block_mesh()),
                 material: std_mats.add(Color::YELLOW.into()),
                 transform: Transform::default().with_scale(Vec3::splat(10.)),
                 ..default()

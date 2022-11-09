@@ -18,6 +18,18 @@ impl IPos {
         IPos(IVec3::new(q, r, z))
     }
     #[must_use]
+    pub fn splat(value: i32) -> Self {
+        IPos(IVec3::splat(value))
+    }
+    #[must_use]
+    pub fn delta(&self, delta_q: i32, delta_r: i32, delta_z: i32) -> Self {
+        IPos(IVec3::new(
+            self.q() + delta_q,
+            self.r() + delta_r,
+            self.z() + delta_z,
+        ))
+    }
+    #[must_use]
     pub fn q(&self) -> i32 {
         self.0.x
     }
@@ -34,6 +46,11 @@ impl IPos {
     #[must_use]
     pub fn z(&self) -> i32 {
         self.0.z
+    }
+    /// Take only the qr-components of the coordinates.
+    #[must_use]
+    pub fn qr(&self) -> IVec2 {
+        self.0.xy()
     }
     /// Convert to the floating-point version of this struct.
     #[must_use]

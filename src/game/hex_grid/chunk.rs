@@ -26,7 +26,10 @@ impl Default for Chunk {
 }
 
 impl Chunk {
-    pub fn get(&self, q: usize, r: usize, z: usize) -> &Block {
+    pub fn get(&self, pos: &IPos) -> &Block {
+        self.get_by_qrz(pos.q() as usize, pos.r() as usize, pos.z() as usize)
+    }
+    pub fn get_by_qrz(&self, q: usize, r: usize, z: usize) -> &Block {
         self.blocks
             .get(z)
             .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))

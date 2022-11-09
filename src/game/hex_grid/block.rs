@@ -23,3 +23,9 @@ impl Default for Block {
         }
     }
 }
+
+impl Block {
+    pub fn is_solid(&self) -> bool {
+        self.block_type != BlockType::Air
+    }
+}
