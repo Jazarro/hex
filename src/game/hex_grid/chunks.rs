@@ -33,7 +33,7 @@ impl Chunks {
             pos_absolute.z().rem_euclid(CHUNK_DIMENSION_Z as i32),
         );
         self.chunks
-            .get(&Self::pos_block_to_chunk(&pos_absolute))
+            .get(&Self::pos_block_to_chunk(pos_absolute))
             .map(|chunk| chunk.get(&pos_relative).is_solid())
             .unwrap_or(false)
     }
@@ -44,7 +44,7 @@ impl Chunks {
     }
 
     pub fn get_chunk(&self, position: &IPos) -> &Chunk {
-        &self.chunks.get(position).unwrap()
+        self.chunks.get(position).unwrap()
     }
 
     pub fn load_chunk_from_disk(position: IVec2) {}

@@ -6,7 +6,6 @@ use bevy::prelude::{
 use crate::assets::config::config_keys::{InputAction, InputHandler};
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
-use crate::game::movement::direction::Direction1D;
 use crate::game::movement::structs::{MoveParams, MoveState};
 use crate::{EulerRot, MoveInput};
 
@@ -130,19 +129,17 @@ fn remap(source: f32, source_from: f32, source_to: f32, target_from: f32, target
     target_from + (source - source_from) * (target_to - target_from) / (source_to / source_from)
 }
 
-pub fn read_movement_input(input_handler: &InputHandler) -> MoveInput {
-    let left = input_handler.is_active(&InputAction::Left);
-    let right = input_handler.is_active(&InputAction::Right);
-    let backward = input_handler.is_active(&InputAction::Backward);
-    let forward = input_handler.is_active(&InputAction::Forward);
-    let down = input_handler.is_active(&InputAction::Down);
-    let up = input_handler.is_active(&InputAction::Up);
+pub fn read_movement_input(input: &InputHandler) -> MoveInput {
     MoveInput {
         xy_plane: Vec2::new(
-            Direction1D::from_input(left, right).signum(),
-            Direction1D::from_input(backward, forward).signum(),
+            input
+                .direction(&InputAction::Left, &InputAction::Right)
+                .signum(),
+            input
+                .direction(&InputAction::Backward, &InputAction::Forward)
+                .signum(),
         ),
-        up_down: Direction1D::from_input(down, up),
-        sprint: input_handler.is_active(&InputAction::Sprint),
+        up_down: input.direction(&InputAction::Down, &InputAction::Up),
+        sprint: input.is_active(&InputAction::Sprint),
     }
 }

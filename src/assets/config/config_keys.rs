@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::assets::loading::meta::MergingAsset;
+use crate::game::movement::direction::Direction1D;
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
@@ -150,5 +151,9 @@ impl InputHandler<'_, '_> {
 
     fn modified(&self, modifiers: &KeyModifiers) -> bool {
         modifiers.iter().all(|key| self.keys.pressed(*key))
+    }
+
+    pub fn direction(&self, negative: &InputAction, positive: &InputAction) -> Direction1D {
+        Direction1D::from_input(self.is_active(negative), self.is_active(positive))
     }
 }

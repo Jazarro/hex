@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use splines::Spline;
 
@@ -6,7 +8,7 @@ use crate::assets::config::config_world::WorldConfig;
 use crate::game::meshes::hexagon::create_single_block_mesh;
 
 #[derive(Component, Default)]
-pub struct Sun {}
+pub struct Sun;
 
 pub fn spawn_sun(
     mut commands: Commands,
@@ -55,6 +57,22 @@ pub struct DayNight {
 pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNight>) {
     if input.is_active(&InputAction::PauseTime) {
         day_night.paused ^= true;
+    }
+    let speed = input.direction(&InputAction::SpeedDownTime, &InputAction::SpeedUpTime);
+    if !speed.is_neutral() {
+        let percent = day_night.timer.percent();
+        let seconds_old = day_night.timer.duration().as_secs_f32();
+        let seconds_new = (seconds_old + speed.signum() * 10.).max(10.);
+        day_night
+            .timer
+            .set_duration(Duration::from_secs_f32(seconds_new));
+        day_night
+            .timer
+            .set_elapsed(Duration::from_secs_f32(seconds_new * percent));
+        info!(
+            "Duration of day-night cycle changed from {} to {}",
+            seconds_old, seconds_new
+        );
     }
 }
 

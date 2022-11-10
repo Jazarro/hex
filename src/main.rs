@@ -1,5 +1,10 @@
 #![forbid(unsafe_code)]
-#![allow(dead_code, unused_variables, clippy::type_complexity)]
+#![allow(
+    dead_code,
+    unused_variables,
+    clippy::type_complexity,
+    clippy::too_many_arguments
+)]
 
 extern crate core;
 
