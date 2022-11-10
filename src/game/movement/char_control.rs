@@ -3,7 +3,7 @@ use bevy::prelude::{
     Camera, EventReader, Quat, Query, Res, Time, Transform, Vec2, Vec3, With, Without,
 };
 
-use crate::assets::config::config_keys::{InputHandler, KeyBinding};
+use crate::assets::config::config_keys::{InputAction, InputHandler};
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::direction::Direction1D;
@@ -131,18 +131,18 @@ fn remap(source: f32, source_from: f32, source_to: f32, target_from: f32, target
 }
 
 pub fn read_movement_input(input_handler: &InputHandler) -> MoveInput {
-    let left = input_handler.is_active(&KeyBinding::Left);
-    let right = input_handler.is_active(&KeyBinding::Right);
-    let backward = input_handler.is_active(&KeyBinding::Backward);
-    let forward = input_handler.is_active(&KeyBinding::Forward);
-    let down = input_handler.is_active(&KeyBinding::Down);
-    let up = input_handler.is_active(&KeyBinding::Up);
+    let left = input_handler.is_active(&InputAction::Left);
+    let right = input_handler.is_active(&InputAction::Right);
+    let backward = input_handler.is_active(&InputAction::Backward);
+    let forward = input_handler.is_active(&InputAction::Forward);
+    let down = input_handler.is_active(&InputAction::Down);
+    let up = input_handler.is_active(&InputAction::Up);
     MoveInput {
         xy_plane: Vec2::new(
             Direction1D::from_input(left, right).signum(),
             Direction1D::from_input(backward, forward).signum(),
         ),
         up_down: Direction1D::from_input(down, up),
-        sprint: input_handler.is_active(&KeyBinding::Sprint),
+        sprint: input_handler.is_active(&InputAction::Sprint),
     }
 }

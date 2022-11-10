@@ -11,7 +11,7 @@ use crate::assets::loading::meta::MergingAsset;
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct KeysConfig {
-    map: HashMap<KeyBinding, Vec<InputMethod>>,
+    map: HashMap<InputAction, Vec<InputBinding>>,
 }
 
 impl MergingAsset for KeysConfig {
@@ -37,7 +37,7 @@ impl MergingAsset for KeysConfig {
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
 #[serde(deny_unknown_fields)]
-pub enum KeyBinding {
+pub enum InputAction {
     /// Player movement.
     Forward,
     Backward,
@@ -58,21 +58,39 @@ pub enum KeyBinding {
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
 #[serde(deny_unknown_fields)]
-pub enum InputMethod {
-    Pressed(KeyModifiers, InputButton),
-    JustPressed(KeyModifiers, InputButton),
-    JustReleased(KeyModifiers, InputButton),
-    MouseWheelUp,
-    MouseWheelDown,
+pub enum InputBinding {
+    /// A single keyboard key without modifiers.
+    /// This option is syntactic sugar to make key-binding config files less cluttered.
+    Key(KeyCode, SignalState),
+    /// A single keyboard key with keyboard modifiers.
+    /// The modifiers can technically be any key, though the settings menu might want to
+    /// constrain users to the conventional ones (shifts, alts, controls and tab).
+    KeyModified(KeyModifiers, KeyCode, SignalState),
+    /// A single mouse button without modifiers.
+    /// This option is syntactic sugar to make key-binding config files less cluttered.
+    Mouse(MouseButton, SignalState),
+    /// A single mouse button with keyboard modifiers.
+    /// The modifiers can technically be any key, though the settings menu might want to
+    /// constrain users to the conventional ones (shifts, alts, controls and tab).
+    MouseModified(KeyModifiers, MouseButton, SignalState),
+    // TODO: Scroll wheel Up & Down
 }
+
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
 #[serde(deny_unknown_fields)]
-pub enum InputButton {
-    Key(KeyCode),
-    Mouse(MouseButton),
+pub enum SignalState {
+    /// Key is down, doesn't matter how long it's been down.
+    Pressed,
+    /// This is the first tick we're detecting this key to be down.
+    JustPressed,
+    /// This is the first tick we're detecting this key to be up, after at least one tick of it being down.
+    JustReleased,
 }
-/// The key should be modified by all of these modifiers.
-/// Valid modifiers are: LCtrl, LShift, LAlt, RCtrl, RShift, RAlt, Tab.
+
+/// All modifier keys must be pressed for the modifier to be considered active.
+///
+/// Examples of conventional modifiers are: LCtrl, LShift, LAlt, RCtrl, RShift, RAlt, Tab,
+/// though any keyboard key is technically valid.
 pub type KeyModifiers = Vec<KeyCode>;
 
 /// Because it is tagged with [`SystemParam`], this struct can serve as a system parameter.
@@ -88,30 +106,43 @@ pub struct InputHandler<'w, 's> {
 }
 
 impl InputHandler<'_, '_> {
-    pub fn is_active(&self, binding: &KeyBinding) -> bool {
+    pub fn is_active(&self, binding: &InputAction) -> bool {
         if let Some(vec) = self.config.map.get(binding) {
             vec.iter().any(|input| match input {
-                InputMethod::Pressed(modifiers, InputButton::Key(key)) => {
+                // Keyboard:
+                InputBinding::Key(key, SignalState::Pressed) => self.keys.pressed(*key),
+                InputBinding::Key(key, SignalState::JustPressed) => self.keys.just_pressed(*key),
+                InputBinding::Key(key, SignalState::JustReleased) => self.keys.just_released(*key),
+                InputBinding::KeyModified(modifiers, key, SignalState::Pressed) => {
                     self.modified(modifiers) && self.keys.pressed(*key)
                 }
-                InputMethod::JustPressed(modifiers, InputButton::Key(key)) => {
+                InputBinding::KeyModified(modifiers, key, SignalState::JustPressed) => {
                     self.modified(modifiers) && self.keys.just_pressed(*key)
                 }
-                InputMethod::JustReleased(modifiers, InputButton::Key(key)) => {
+                InputBinding::KeyModified(modifiers, key, SignalState::JustReleased) => {
                     self.modified(modifiers) && self.keys.just_released(*key)
                 }
-                InputMethod::Pressed(modifiers, InputButton::Mouse(btn)) => {
+                // Mouse:
+                InputBinding::Mouse(btn, SignalState::Pressed) => self.mouse_buttons.pressed(*btn),
+                InputBinding::Mouse(btn, SignalState::JustPressed) => {
+                    self.mouse_buttons.just_pressed(*btn)
+                }
+                InputBinding::Mouse(btn, SignalState::JustReleased) => {
+                    self.mouse_buttons.just_released(*btn)
+                }
+                InputBinding::MouseModified(modifiers, btn, SignalState::Pressed) => {
                     self.modified(modifiers) && self.mouse_buttons.pressed(*btn)
                 }
-                InputMethod::JustPressed(modifiers, InputButton::Mouse(btn)) => {
+                InputBinding::MouseModified(modifiers, btn, SignalState::JustPressed) => {
                     self.modified(modifiers) && self.mouse_buttons.just_pressed(*btn)
                 }
-                InputMethod::JustReleased(modifiers, InputButton::Mouse(btn)) => {
+                InputBinding::MouseModified(modifiers, btn, SignalState::JustReleased) => {
                     self.modified(modifiers) && self.mouse_buttons.just_released(*btn)
                 }
-                _ => panic!("Not implemented yet."),
             })
         } else {
+            // To leave a input action unbound without this warning triggering;
+            // add the action to the key bindings config file but leave the vector of InputBindings empty.
             warn!("Key-binding lookup failed: {:?} wasn't bound.", binding);
             false
         }

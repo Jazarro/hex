@@ -1,16 +1,16 @@
 Keys((
     map: {
         // Player movement:
-        Forward: [Pressed([], Key(W)), Pressed([], Key(Up))],
-        Backward: [Pressed([], Key(S)), Pressed([], Key(Down))],
-        Left: [Pressed([], Key(A)), Pressed([], Key(Left))],
-        Right: [Pressed([], Key(D)), Pressed([], Key(Right))],
-        Up: [Pressed([], Key(Space))],
-        Down: [Pressed([], Key(LControl)), Pressed([], Key(C))],
-        Sprint: [Pressed([], Key(LShift))],
+        Forward: [Key(W, Pressed), Key(Up, Pressed)],
+        Backward: [Key(S, Pressed), Key(Down, Pressed)],
+        Left: [Key(A, Pressed), Key(Left, Pressed)],
+        Right: [Key(D, Pressed), Key(Right, Pressed)],
+        Up: [Key(Space, Pressed)],
+        Down: [Key(LControl, Pressed), Key(C, Pressed)],
+        Sprint: [Key(LShift, Pressed)],
         // Debug time controls:
-        PauseTime: [JustPressed([], Key(P))],
-        SpeedDownTime: [JustPressed([], Key(LBracket))],
-        SpeedUpTime: [JustPressed([], Key(RBracket))],
+        PauseTime: [Key(P, JustPressed)],
+        SpeedDownTime: [Key(LBracket, JustPressed)],
+        SpeedUpTime: [Key(RBracket, JustPressed)],
     }
 ))

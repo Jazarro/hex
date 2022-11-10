@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use splines::Spline;
 
-use crate::assets::config::config_keys::{InputHandler, KeyBinding};
+use crate::assets::config::config_keys::{InputAction, InputHandler};
 use crate::assets::config::config_world::WorldConfig;
 use crate::game::meshes::hexagon::create_single_block_mesh;
 
@@ -53,7 +53,7 @@ pub struct DayNight {
 }
 
 pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNight>) {
-    if input.is_active(&KeyBinding::PauseTime) {
+    if input.is_active(&InputAction::PauseTime) {
         day_night.paused ^= true;
     }
 }
