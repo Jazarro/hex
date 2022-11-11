@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use splines::Spline;
 
+use crate::assets::config::config_debug::DebugConfig;
 use crate::assets::config::config_keys::{InputAction, InputHandler};
 use crate::assets::config::config_world::WorldConfig;
 use crate::game::meshes::hexagon::create_single_block_mesh;
@@ -12,7 +13,8 @@ pub struct Sun;
 
 pub fn spawn_sun(
     mut commands: Commands,
-    config: Res<WorldConfig>,
+    world_config: Res<WorldConfig>,
+    debug_config: Res<DebugConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
@@ -35,13 +37,17 @@ pub fn spawn_sun(
                 ..default()
             });
         });
+    let mut timer = Timer::from_seconds(world_config.day_night_duration_seconds, true);
+    timer.set_elapsed(Duration::from_secs_f32(
+        world_config.day_night_duration_seconds * 3. / 8.,
+    )); // <== At game start, set the time to 9:00 AM.
     commands.insert_resource(DayNight {
-        paused: false,
-        timer: Timer::from_seconds(config.daynight_duration_seconds, true),
-        illuminance: config.illuminance(),
-        redness: config.redness(),
-        greenness: config.greenness(),
-        blueness: config.blueness(),
+        paused: debug_config.pause_time_at_game_start,
+        timer,
+        illuminance: world_config.illuminance(),
+        redness: world_config.redness(),
+        greenness: world_config.greenness(),
+        blueness: world_config.blueness(),
     });
 }
 
@@ -74,6 +80,16 @@ pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNig
             seconds_old, seconds_new
         );
     }
+    let set_time = input.direction(&InputAction::SetTimeBack, &InputAction::SetTimeForward);
+    if !set_time.is_neutral() {
+        let duration = day_night.timer.duration().as_secs_f32();
+        let percent =
+            ((day_night.timer.percent() * 8.) as i32 + set_time.signum_i()).rem_euclid(8) as f32;
+        day_night
+            .timer
+            .set_elapsed(Duration::from_secs_f32(duration * percent / 8.));
+        info!("Set time of day to {} o'clock.", percent * 3.);
+    }
 }
 
 pub fn animate_sun(
@@ -82,10 +98,9 @@ pub fn animate_sun(
     mut day_night: ResMut<DayNight>,
     mut query: Query<(&mut Transform, &mut DirectionalLight, &Sun)>,
 ) {
-    if day_night.paused {
-        return;
+    if !day_night.paused {
+        day_night.timer.tick(time.delta());
     }
-    day_night.timer.tick(time.delta());
     for (mut transform, mut light, sun) in query.iter_mut() {
         light.illuminance = day_night
             .illuminance

@@ -12,5 +12,7 @@ Keys((
         PauseTime: [Key(P, JustPressed)],
         SpeedDownTime: [Key(LBracket, JustPressed)],
         SpeedUpTime: [Key(RBracket, JustPressed)],
+        SetTimeBack: [KeyModified([LShift], LBracket, JustPressed)],
+        SetTimeForward: [KeyModified([LShift], RBracket, JustPressed)],
     }
 ))

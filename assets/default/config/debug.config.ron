@@ -1,7 +1,4 @@
 Debug((
-    // If true, opens a secondary window containing debug egui tools, such as the inspector and a tool to win or lose the game.
-    // show_debug_window: false,
-
     // If true, skips past the main menu:
     // skip_straight_to_game: false,
 
@@ -11,4 +8,6 @@ Debug((
     origin_lines_display: Positive,
     origin_lines_length: 100.,
     origin_lines_cone_scale: 10.,
+
+    pause_time_at_game_start: true,
 ))

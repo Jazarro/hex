@@ -5,7 +5,7 @@ use splines::{Interpolation, Key, Spline};
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct WorldConfig {
-    pub daynight_duration_seconds: f32,
+    pub day_night_duration_seconds: f32,
     pub sun_midnight: SunState,
     pub sun_dawn: SunState,
     pub sun_noon: SunState,

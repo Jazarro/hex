@@ -6,6 +6,7 @@ pub struct DebugConfig {
     pub origin_lines_display: OriginLinesDisplay,
     pub origin_lines_length: f32,
     pub origin_lines_cone_scale: f32,
+    pub pause_time_at_game_start: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

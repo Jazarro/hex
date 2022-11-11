@@ -55,6 +55,10 @@ pub enum InputAction {
     SpeedUpTime,
     /// Speed down the day-night cycle. For debugging purposes.
     SpeedDownTime,
+    /// Sets time of day backward in increments of three hours.
+    SetTimeBack,
+    /// Sets time of day forward in increments of three hours.
+    SetTimeForward,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]

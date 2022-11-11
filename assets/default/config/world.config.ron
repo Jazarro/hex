@@ -1,5 +1,5 @@
 World((
-    daynight_duration_seconds: 30.,
+    day_night_duration_seconds: 30.,
     sun_midnight: (
         illuminance: 0.,
         color: Rgba(red:0., green:0., blue:0., alpha:1.),
