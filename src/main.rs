@@ -8,6 +8,9 @@
 
 extern crate core;
 
+#[cfg(feature = "debugwindow")]
+use crate::debug_window::DebugWindowPlugin;
+
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
@@ -46,7 +49,6 @@ fn main() {
         filter: "error".into(),
         level: Level::ERROR,
     });
-    app.insert_resource(MoveInput::default());
     app.add_plugins(DefaultPlugins)
         .add_plugin(MaterialPlugin::<LineMaterial>::default())
         .add_system(close_on_esc)

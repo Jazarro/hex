@@ -1,29 +1,37 @@
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Sub};
 
 use bevy::math::*;
 use serde::{Deserialize, Serialize};
 
-use crate::game::hex_grid::axial::Pos;
+use crate::game::hex_grid::axial::{IPos, Pos, RADIUS, SQRT_THREE};
+use crate::game::hex_grid::chunk::{CHUNK_HEIGHT, CHUNK_RADIUS};
 
-/// A hexagonal coordinate in the flat-topped axial coordinate system.
-/// This is the integral version. There is also a floating-point version.
-/// For more information, see https://www.redblobgames.com/grids/hexagons/
+/// Distance away from the origin in a pointy-topped axial coordinate system for every 1m distance
+/// along the x-axis in a regular 'square' coordinate system.
+const CHUNK_QR_PER_X: Vec2 = Vec2::new(SQRT_THREE / 3., 0.);
+/// Distance away from the origin in a pointy-topped axial coordinate system for every 1m distance
+/// along the y-axis in a regular 'square' coordinate system.
+const CHUNK_QR_PER_Y: Vec2 = Vec2::new(-1. / 3., 2. / 3.);
+
+/// ChunkIds are pointy-topped axial coordinates. They are NOT compatible with block
+/// positions (IPos), which use flat-topped axial coordinates.
+/// There are functions to convert between them.
 #[derive(Deserialize, Serialize, Default, Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct IPos(pub(crate) IVec3);
+pub struct ChunkId(pub(crate) IVec3);
 
-impl IPos {
+impl ChunkId {
     #[must_use]
     pub fn new(q: i32, r: i32, z: i32) -> Self {
-        IPos(IVec3::new(q, r, z))
+        ChunkId(IVec3::new(q, r, z))
     }
     #[must_use]
     pub fn splat(value: i32) -> Self {
-        IPos(IVec3::splat(value))
+        ChunkId(IVec3::splat(value))
     }
     #[must_use]
     pub fn delta(&self, delta_q: i32, delta_r: i32, delta_z: i32) -> Self {
-        IPos(IVec3::new(
+        ChunkId(IVec3::new(
             self.q() + delta_q,
             self.r() + delta_r,
             self.z() + delta_z,
@@ -69,30 +77,42 @@ impl IPos {
         delta.q().abs().max(delta.r().abs()).max(delta.z().abs())
     }
     #[must_use]
-    pub fn neighbour(&self, neighbour_index: u32) -> Self {
-        self + &Self::direction(neighbour_index)
+    pub fn center_pos(&self) -> IPos {
+        IPos::new(
+            (CHUNK_RADIUS as i32 * 2 + 1) * self.q() + CHUNK_RADIUS as i32 * self.r(),
+            CHUNK_RADIUS as i32 * -self.q() + (CHUNK_RADIUS as i32 + 1) * self.r(),
+            self.z() * CHUNK_HEIGHT as i32,
+        )
     }
     #[must_use]
-    pub fn direction(neighbour_index: u32) -> Self {
-        // On the unit circle, the vertex at i=0 is located at (1,0).
-        // Vertices are going counter-clockwise around the unit circle.
-        // The first neighbour at (q=1, r=0) borders the face between the first two vertices.
-        match neighbour_index.rem_euclid(6) {
-            0 => IPos::new(1, 0, 0),  // <== North-east neighbour
-            1 => IPos::new(0, 1, 0),  // <== North neighbour.
-            2 => IPos::new(-1, 1, 0), // <== North-west neighbour.
-            3 => IPos::new(-1, 0, 0), // <== South-west neighbour.
-            4 => IPos::new(0, -1, 0), // <== South neighbour.
-            5 => IPos::new(1, -1, 0), // <== South-east neighbour.
-            _ => panic!("Shouldn't happen, compiler doesn't realise this match is exhaustive."),
-        }
+    pub fn from_xyz(xyz: &Vec3) -> Self {
+        let distance_to_edge = (CHUNK_RADIUS as f32 + 0.5) * RADIUS * SQRT_THREE;
+        let half_edge = RADIUS * 0.5;
+        let chunk_virtual_hex_radius = distance_to_edge.hypot(half_edge);
+        let angle = -1. * (half_edge / chunk_virtual_hex_radius).asin();
+        let xyz = Vec3::new(
+            xyz.x * angle.cos() - xyz.y * angle.sin(),
+            xyz.x * angle.sin() + xyz.y * angle.cos(),
+            xyz.z,
+        );
+        let qr = (CHUNK_QR_PER_X * xyz.x + CHUNK_QR_PER_Y * xyz.y) / chunk_virtual_hex_radius;
+        let rounded = Pos::new(qr.x, qr.y, 0.).round();
+        ChunkId::new(
+            rounded.q() as i32,
+            rounded.r() as i32,
+            (xyz.z / CHUNK_HEIGHT as f32).floor() as i32,
+        )
+    }
+    #[must_use]
+    pub fn from_block_pos(block_pos: &IPos) -> Self {
+        Self::from_xyz(&block_pos.as_xyz())
     }
 }
 
 /// Order by q first, then r, then z.
 ///
 /// This is implemented purely to make it possible to save level files in a deterministic way.
-impl PartialOrd<Self> for IPos {
+impl PartialOrd<Self> for ChunkId {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if self.q() < other.q() {
             Some(Ordering::Less)
@@ -112,29 +132,13 @@ impl PartialOrd<Self> for IPos {
     }
 }
 
-impl Ord for IPos {
+impl Ord for ChunkId {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
-impl Add for IPos {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        Self(self.0 + other.0)
-    }
-}
-
-impl Add for &IPos {
-    type Output = IPos;
-
-    fn add(self, other: &IPos) -> IPos {
-        IPos(self.0 + other.0)
-    }
-}
-
-impl Sub for IPos {
+impl Sub for ChunkId {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -142,34 +146,26 @@ impl Sub for IPos {
     }
 }
 
-impl Sub for &IPos {
-    type Output = IPos;
+impl Add for ChunkId {
+    type Output = Self;
 
-    fn sub(self, other: &IPos) -> IPos {
-        IPos(self.0 - other.0)
+    fn add(self, other: Self) -> Self {
+        Self(self.0 + other.0)
     }
 }
 
-impl Mul for IPos {
-    type Output = Self;
+impl Sub for &ChunkId {
+    type Output = ChunkId;
 
-    fn mul(self, other: Self) -> Self::Output {
-        IPos(self.0 * other.0)
+    fn sub(self, other: &ChunkId) -> ChunkId {
+        ChunkId(self.0 - other.0)
     }
 }
 
-impl Mul<i32> for IPos {
-    type Output = Self;
+impl Add for &ChunkId {
+    type Output = ChunkId;
 
-    fn mul(self, rhs: i32) -> Self::Output {
-        IPos(self.0 * rhs)
-    }
-}
-
-impl Div for IPos {
-    type Output = Self;
-
-    fn div(self, other: Self) -> Self::Output {
-        IPos(self.0 / other.0)
+    fn add(self, other: &ChunkId) -> ChunkId {
+        ChunkId(self.0 + other.0)
     }
 }

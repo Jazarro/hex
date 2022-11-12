@@ -6,12 +6,13 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 use crate::animate_simple::rotate;
 use crate::game::actors::player::setup_player;
+use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::{
     cursor_grab, position_player_camera, rotate_player_camera, PlayerCamera,
 };
-use crate::game::meshes::debug_lines::spawn_debug_lines;
-
+use crate::game::hex_grid::axial::{ChunkId, Pos};
 use crate::game::hex_grid::chunks::Chunks;
+use crate::game::meshes::debug_lines::spawn_debug_lines;
 use crate::game::meshes::hexagon::spawn_chunk_new;
 use crate::game::meshes::sun::{animate_sun, process_day_night_input, spawn_sun};
 use crate::game::movement::char_control::player_movement_system;
@@ -30,8 +31,8 @@ impl Plugin for GameState {
                 .with_system(spawn_sun)
                 .with_system(setup_player)
                 .with_system(spawn_debug_lines)
-                // .with_system(spawn_chunk)
                 .with_system(spawn_chunk_new)
+                // .with_system(spawn_test_grid)
                 .into(),
         )
         .add_system_set(
@@ -43,8 +44,22 @@ impl Plugin for GameState {
                 .with_system(player_movement_system)
                 .with_system(rotate_player_camera)
                 .with_system(position_player_camera)
+                // .with_system(temp_chunk_test)
                 .into(),
         );
+    }
+}
+
+#[derive(Component)]
+pub struct ChunkTest {
+    pos: ChunkId,
+}
+
+fn temp_chunk_test(query: Query<(&Transform, &Player)>) {
+    if let Ok((transform, _)) = query.get_single() {
+        let pos = Pos::from_xyz(&transform.translation).as_ipos_round();
+        let chunk_pos = ChunkId::from_block_pos(&pos);
+        info!("Pos={:?}\tChunk={:?}", pos, chunk_pos);
     }
 }
 

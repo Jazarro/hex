@@ -1,4 +1,4 @@
-use crate::game::hex_grid::chunk::{CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R};
+use bevy::math::DVec2;
 use bevy::prelude::*;
 use noise::{NoiseFn, OpenSimplex};
 
@@ -100,7 +100,7 @@ pub fn get_noise_profile(noise_layer: NoiseLayer) -> NoiseProfile {
     }
 }
 
-pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
+pub fn generate_noise(position: DVec2, bounds: IVec2, profile: NoiseProfile) -> Vec<f64> {
     let mut noise: Vec<f64> = Vec::new();
     let open_simplex = OpenSimplex::new(SEED);
 
@@ -125,19 +125,19 @@ pub fn generate_noise(position: IVec2, profile: NoiseProfile) -> Vec<f64> {
         scale = 0.0001;
     }
 
-    let half_width = CHUNK_DIMENSION_Q as f64 / 2.0;
-    let half_height = CHUNK_DIMENSION_R as f64 / 2.0;
+    let half_width = bounds.x as f64 / 2.0;
+    let half_height = bounds.y as f64 / 2.0;
     let mut row_offset = 0.0;
 
-    for r in 0..CHUNK_DIMENSION_R {
-        for q in 0..CHUNK_DIMENSION_Q {
+    for y in 0..bounds.y {
+        for x in 0..bounds.x {
             let mut amplitude: f64 = 1.0;
             let mut frequency: f64 = 1.0;
             let mut noise_value: f64 = 0.0;
 
             for i in 0..octaves {
-                let mut q_sample = q as f64 + row_offset as f64 + position.x as f64; // * CHUNK_WIDTH ???
-                let mut r_sample = r as f64 + position.y as f64; // * CHUNK_HEIGHT ???
+                let mut q_sample = x as f64 + row_offset as f64 + position.x; // * CHUNK_WIDTH ???
+                let mut r_sample = y as f64 + position.y; // * CHUNK_HEIGHT ???
                 q_sample = (q_sample - half_width) / scale * frequency
                     + octave_offsets[i as usize].x as f64;
                 r_sample = (r_sample - half_height) / scale * frequency

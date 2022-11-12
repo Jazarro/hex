@@ -2,45 +2,48 @@ use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
 
 use crate::game::hex_grid::axial;
-use crate::game::hex_grid::axial::{IPos, Pos, FRAC_TAU_6};
-use crate::game::hex_grid::block::BlockType;
-use crate::game::hex_grid::chunk::{
-    Chunk, CHUNK_DIMENSION_Q, CHUNK_DIMENSION_R, CHUNK_DIMENSION_Z,
-};
+use crate::game::hex_grid::axial::{ChunkId, IPos, FRAC_TAU_6};
+use crate::game::hex_grid::chunk::{Chunk, CHUNK_HEIGHT};
 use crate::game::hex_grid::chunks::Chunks;
 
-/// For testing.
-///
-/// Old, unoptimised scenario:
-/// For a 64 x 64 x 16 chunk, this uses 1308500 vertices across 26170 meshes.
-///
-pub fn spawn_chunk(
+pub fn spawn_test_grid(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
-    let chunk = Chunk::new(IVec2::new(0, 0));
-    for z in 0..CHUNK_DIMENSION_Z - 1 {
-        for r in 0..CHUNK_DIMENSION_R - 1 {
-            for q in 0..CHUNK_DIMENSION_Q - 1 {
-                let pos = Pos::new(q as f32, r as f32, z as f32);
+    for chunk_r in 0..8 {
+        for chunk_q in 0..8 {
+            let chunk_pos = ChunkId::new(chunk_q as i32, chunk_r as i32, 0);
+            // info!("Chunk: {:?}, center at: {:?}", chunk_pos, chunk_pos.center_pos());
+            commands.spawn_bundle(MaterialMeshBundle {
+                mesh: meshes.add(create_single_block_mesh()),
+                transform: Transform::from_translation(
+                    chunk_pos.center_pos().as_xyz()
+                        + Vec3::new(0., 0., 1. + (chunk_q + chunk_r) as f32 * 0.5),
+                ),
+                material: std_mats.add(Color::WHITE.into()),
+                ..default()
+            });
 
-                let block = chunk.get_by_qrz(q, r, z);
-                if block.block_type == BlockType::Air {
-                    continue;
-                }
-
+            for (i, block_pos) in Chunk::chunk_columns()
+                .iter()
+                .map(|relative_pos| relative_pos + &chunk_pos.center_pos())
+                .enumerate()
+            {
+                let mut xyz = block_pos.as_xyz();
+                xyz.z += if chunk_q % 2 == 0 { 0. } else { 0.1 };
+                xyz.z += (chunk_q + chunk_r) as f32 * 0.5;
+                let what_chunk_it_thinks_it_belongs_to = ChunkId::from_block_pos(&block_pos);
                 commands.spawn_bundle(MaterialMeshBundle {
                     mesh: meshes.add(create_single_block_mesh()),
-                    transform: Transform::from_translation(pos.as_xyz()),
+                    transform: Transform::from_translation(xyz),
                     material: std_mats.add(
-                        // Color::rgb(
-                        //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
-                        //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
-                        //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
-                        // )
-                        // .into(),
-                        Color::WHITE.into(),
+                        Color::rgb(
+                            (what_chunk_it_thinks_it_belongs_to.q() as f32 / 8.).abs(),
+                            (what_chunk_it_thinks_it_belongs_to.r() as f32 / 8.).abs(),
+                            0.,
+                        )
+                        .into(),
                     ),
                     ..default()
                 });
@@ -55,37 +58,35 @@ pub fn spawn_chunk_new(
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
     let mut chunks = Chunks::default();
-    let chunk_pos = IPos::splat(0);
-    chunks.generate_chunk(chunk_pos);
-    commands.spawn_bundle(MaterialMeshBundle {
-        mesh: meshes.add(create_chunk_mesh(&chunks, &chunk_pos)),
-        transform: Transform::default(),
-        material: std_mats.add(
-            // Color::rgb(
-            //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
-            //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
-            //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
-            // )
-            // .into(),
-            Color::WHITE.into(),
-        ),
-        ..default()
-    });
+    for chunk_r in 0..8 {
+        for chunk_q in 0..8 {
+            let chunk_pos = ChunkId::new(chunk_q, chunk_r, 0);
+            chunks.generate_chunk(chunk_pos);
+        }
+    }
+    for chunk_r in 0..8 {
+        for chunk_q in 0..8 {
+            let chunk_pos = ChunkId::new(chunk_q, chunk_r, 0);
+            commands.spawn_bundle(MaterialMeshBundle {
+                mesh: meshes.add(create_chunk_mesh(&chunks, &chunk_pos)),
+                transform: Transform::default(),
+                material: std_mats.add(
+                    // Color::rgb(
+                    //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
+                    //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
+                    //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
+                    // )
+                    // .into(),
+                    Color::WHITE.into(),
+                ),
+                ..default()
+            });
+        }
+    }
 }
 
-pub fn create_chunk_mesh(chunks: &Chunks, chunk_pos: &IPos) -> Mesh {
-    let chunk = chunks.get_chunk(chunk_pos);
-    // On the unit circle, the vertex at i=0 is located at (1,0).
-    // Vertices are going counter-clockwise around the unit circle.
-    // The first neighbour at (q=1, r=1) borders the face between the first two vertices.
-    let neighbours_horizontal = [
-        IPos::new(1, 0, 0),  // <== North-east neighbour
-        IPos::new(0, 1, 0),  // <== North neighbour.
-        IPos::new(-1, 1, 0), // <== North-west neighbour.
-        IPos::new(-1, 0, 0), // <== South-west neighbour.
-        IPos::new(0, -1, 0), // <== South neighbour.
-        IPos::new(1, -1, 0), // <== South-east neighbour.
-    ];
+pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
+    let chunk = chunks.get_chunk(chunk_id);
     let vertical_neighbours = [
         IPos::new(0, 0, -1), // <== Bottom neighbour
         IPos::new(0, 0, 1),  // <== Top neighbour
@@ -98,80 +99,78 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_pos: &IPos) -> Mesh {
     let normal_top = Vec3::new(0.0, 0.0, 1.0);
     let mut vertices = vec![];
     let mut indices = vec![];
-    for q in 0..CHUNK_DIMENSION_Q {
-        for r in 0..CHUNK_DIMENSION_R {
-            // First add all the vertical faces:
-            (0..6).for_each(|i: i8| {
-                let angle_a = FRAC_TAU_6 * i as f32;
-                let angle_b = FRAC_TAU_6 * (i + 1).rem_euclid(6) as f32;
-                let normal_a = Vec3::new(angle_a.cos(), angle_a.sin(), 0.);
-                let normal_b = Vec3::new(angle_b.cos(), angle_b.sin(), 0.);
-                let normal_face = ((normal_a + normal_b) / 2.).normalize();
-                for z in 0..CHUNK_DIMENSION_Z {
-                    let pos_relative = IPos::new(q as i32, r as i32, z as i32);
-                    if !chunk.get(&pos_relative).is_solid() {
-                        // This block isn't solid, so we obviously shouldn't include it in the mesh.
-                        continue;
-                    }
-                    let pos_absolute = &pos_relative + chunk_pos;
-                    let neighbour = pos_absolute + neighbours_horizontal[i as usize];
-                    if chunks.is_solid(&neighbour) {
-                        // The neighbour is solid, so there is no point in rendering this face.
-                        continue;
-                    }
-                    let (pos_a_bottom, pos_a_top) = calc_pos(angle_a, &pos_absolute);
-                    let (pos_b_bottom, pos_b_top) = calc_pos(angle_b, &pos_absolute);
-                    vertices.push((pos_a_bottom, normal_face, [1., 1.]));
-                    vertices.push((pos_b_bottom, normal_face, [1., 1.]));
-                    vertices.push((pos_a_top, normal_face, [1., 1.]));
-                    vertices.push((pos_b_top, normal_face, [1., 1.]));
-                    let len = vertices.len() as u32;
-                    indices.append(&mut vec![len - 4, len - 3, len - 2]);
-                    indices.append(&mut vec![len - 1, len - 2, len - 3]);
-                }
-            });
-            // Now add the top and bottom faces:
-            for z in 0..CHUNK_DIMENSION_Z {
-                let pos_relative = IPos::new(q as i32, r as i32, z as i32);
-                if !chunk.get(&pos_relative).is_solid() {
+    for pos in Chunk::chunk_columns().iter() {
+        // First add all the vertical faces:
+        (0..6).for_each(|i: i8| {
+            let angle_a = FRAC_TAU_6 * i as f32;
+            let angle_b = FRAC_TAU_6 * (i + 1).rem_euclid(6) as f32;
+            let normal_a = Vec3::new(angle_a.cos(), angle_a.sin(), 0.);
+            let normal_b = Vec3::new(angle_b.cos(), angle_b.sin(), 0.);
+            let normal_face = ((normal_a + normal_b) / 2.).normalize();
+            for z in 0..CHUNK_HEIGHT {
+                let pos_relative = pos.delta(0, 0, z as i32);
+                if !chunk.block(&pos_relative).is_solid() {
                     // This block isn't solid, so we obviously shouldn't include it in the mesh.
                     continue;
                 }
-                let pos_absolute = &pos_relative + chunk_pos;
-                (0..2).for_each(|j: i8| {
-                    // j==0 for bottom face, j==1 for top face.
-                    // Check if the neighbour is solid. If so, we don't have to render this face:
-                    let neighbour = pos_absolute + vertical_neighbours[j as usize];
-                    if !chunks.is_solid(&neighbour) {
-                        let xyz = pos_absolute.delta(0, 0, j as i32).as_xyz();
-                        let len = vertices.len() as u32;
-                        // Center vertex:
-                        vertices.push((xyz, vertical_normals[j as usize], [1., 1.]));
-                        // Corner vertices:
-                        (0..6).for_each(|i: i8| {
-                            let angle = FRAC_TAU_6 * i as f32;
-                            let pos_corner = Vec3::new(
-                                angle.cos() * axial::RADIUS + xyz.x,
-                                angle.sin() * axial::RADIUS + xyz.y,
-                                xyz.z,
-                            );
-                            vertices.push((pos_corner, vertical_normals[j as usize], [1., 1.]));
-                            indices.append(&mut vec![
-                                len,
-                                len + 1 + (i as u32 + 1 - j as u32).rem_euclid(6),
-                                len + 1 + (i as u32 + j as u32).rem_euclid(6),
-                            ]);
-                        });
-                    }
-                });
+                let pos_absolute = pos_relative + chunk_id.center_pos();
+                let neighbour = pos_absolute.neighbour(i as u32);
+                if chunks.is_solid(&neighbour) {
+                    // The neighbour is solid, so there is no point in rendering this face.
+                    continue;
+                }
+                let (pos_a_bottom, pos_a_top) = calc_pos(angle_a, &pos_absolute);
+                let (pos_b_bottom, pos_b_top) = calc_pos(angle_b, &pos_absolute);
+                vertices.push((pos_a_bottom, normal_face, [1., 1.]));
+                vertices.push((pos_b_bottom, normal_face, [1., 1.]));
+                vertices.push((pos_a_top, normal_face, [1., 1.]));
+                vertices.push((pos_b_top, normal_face, [1., 1.]));
+                let len = vertices.len() as u32;
+                indices.append(&mut vec![len - 4, len - 3, len - 2]);
+                indices.append(&mut vec![len - 1, len - 2, len - 3]);
             }
+        });
+        // Now add the top and bottom faces:
+        for z in 0..CHUNK_HEIGHT {
+            let pos_relative = pos.delta(0, 0, z as i32);
+            if !chunk.block(&pos_relative).is_solid() {
+                // This block isn't solid, so we obviously shouldn't include it in the mesh.
+                continue;
+            }
+            let pos_absolute = pos_relative + chunk_id.center_pos();
+            (0..2).for_each(|j: i8| {
+                // j==0 for bottom face, j==1 for top face.
+                // Check if the neighbour is solid. If so, we don't have to render this face:
+                let neighbour = pos_absolute + vertical_neighbours[j as usize];
+                if !chunks.is_solid(&neighbour) {
+                    let xyz = pos_absolute.delta(0, 0, j as i32).as_xyz();
+                    let len = vertices.len() as u32;
+                    // Center vertex:
+                    vertices.push((xyz, vertical_normals[j as usize], [1., 1.]));
+                    // Corner vertices:
+                    (0..6).for_each(|i: i8| {
+                        let angle = FRAC_TAU_6 * i as f32;
+                        let pos_corner = Vec3::new(
+                            angle.cos() * axial::RADIUS + xyz.x,
+                            angle.sin() * axial::RADIUS + xyz.y,
+                            xyz.z,
+                        );
+                        vertices.push((pos_corner, vertical_normals[j as usize], [1., 1.]));
+                        indices.append(&mut vec![
+                            len,
+                            len + 1 + (i as u32 + 1 - j as u32).rem_euclid(6),
+                            len + 1 + (i as u32 + j as u32).rem_euclid(6),
+                        ]);
+                    });
+                }
+            });
         }
     }
     debug!(
         "Spawned chunk ({},{},{}) with {} vertices and {} indices.",
-        chunk_pos.q(),
-        chunk_pos.r(),
-        chunk_pos.z(),
+        chunk_id.q(),
+        chunk_id.r(),
+        chunk_id.z(),
         vertices.len(),
         indices.len()
     );

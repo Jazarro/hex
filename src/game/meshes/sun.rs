@@ -63,6 +63,10 @@ pub struct DayNight {
 pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNight>) {
     if input.is_active(&InputAction::PauseTime) {
         day_night.paused ^= true;
+        info!(
+            "Toggled day-night cycle {}!",
+            if day_night.paused { "off" } else { "on" }
+        );
     }
     let speed = input.direction(&InputAction::SpeedDownTime, &InputAction::SpeedUpTime);
     if !speed.is_neutral() {
@@ -76,7 +80,7 @@ pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNig
             .timer
             .set_elapsed(Duration::from_secs_f32(seconds_new * percent));
         info!(
-            "Duration of day-night cycle changed from {} to {}",
+            "Duration of day-night cycle changed from {}s to {}s",
             seconds_old, seconds_new
         );
     }

@@ -1,74 +1,112 @@
-use bevy::math::IVec2;
-use rand::distributions::Bernoulli;
+use bevy::math::{IVec2, Vec3Swizzles};
 
-use crate::game::hex_grid::axial::IPos;
+use crate::game::hex_grid::axial::{ChunkId, IPos};
 use crate::game::hex_grid::biomes::generate_biomes;
 use crate::game::hex_grid::block::{Block, BlockType};
-use crate::game::hex_grid::chunks::{map_value, qr_to_index};
+use crate::game::hex_grid::chunks::map_value;
 use crate::game::procedural_generation::noise_generation::{
     generate_noise, get_noise_profile, NoiseLayer,
 };
 
-pub const CHUNK_DIMENSION_Q: usize = 64;
-pub const CHUNK_DIMENSION_R: usize = 64;
-pub const CHUNK_DIMENSION_Z: usize = 16;
+pub const CHUNK_RADIUS: usize = 8;
+pub const CHUNK_HEIGHT: usize = 32;
+pub const CHUNK_BOUNDS: usize = CHUNK_RADIUS * 2 + 1;
 
 pub struct Chunk {
-    blocks: [[[Block; CHUNK_DIMENSION_Q]; CHUNK_DIMENSION_R]; CHUNK_DIMENSION_Z],
+    /// Outer array is Q-coordinate. Second array is R-coordinate. Inner array is Z-coordinate.
+    /// Since chunks are hexagonal, not all columns in a square array exist.
+    /// That's why the inner array is wrapped in an Option.
+    blocks: [[Option<[Block; CHUNK_HEIGHT]>; CHUNK_BOUNDS]; CHUNK_BOUNDS],
 }
 
 impl Default for Chunk {
     fn default() -> Self {
-        Chunk {
-            blocks: [[[Block::default(); CHUNK_DIMENSION_Q]; CHUNK_DIMENSION_R]; CHUNK_DIMENSION_Z],
+        let mut chunk = Self {
+            blocks: [[None; CHUNK_BOUNDS]; CHUNK_BOUNDS],
+        };
+        for pos in Chunk::chunk_columns().iter() {
+            let storage_pos = Chunk::storage_pos(pos);
+            *chunk
+                .blocks
+                .get_mut(storage_pos.q() as usize)
+                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+                .get_mut(storage_pos.r() as usize)
+                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos))) =
+                Some([Block::default(); CHUNK_HEIGHT]);
         }
+        chunk
     }
 }
 
 impl Chunk {
-    pub fn get(&self, pos: &IPos) -> &Block {
-        self.get_by_qrz(pos.q() as usize, pos.r() as usize, pos.z() as usize)
+    /// Converts relative position (relative to the chunk center)
+    /// to storage position (internal array storage).
+    /// This is needed because the relative position can be negative; it spirals out from (0,0).
+    fn storage_pos(relative_pos: &IPos) -> IPos {
+        relative_pos + &IPos::new(CHUNK_RADIUS as i32, CHUNK_RADIUS as i32, 0)
     }
-    pub fn get_by_qrz(&self, q: usize, r: usize, z: usize) -> &Block {
+    #[must_use]
+    pub fn block(&self, pos: &IPos) -> &Block {
+        let storage_pos = Chunk::storage_pos(pos);
         self.blocks
-            .get(z)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
-            .get(r)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
-            .get(q)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
+            .get(storage_pos.q() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .get(storage_pos.r() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .as_ref()
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .get(storage_pos.z() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
     }
-
-    pub fn set(&mut self, q: usize, r: usize, z: usize, block: Block) {
+    pub fn set(&mut self, pos: &IPos, block: Block) {
+        let storage_pos = Chunk::storage_pos(pos);
         *self
             .blocks
-            .get_mut(z)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
-            .get_mut(r)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z)))
-            .get_mut(q)
-            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(q, r, z))) = block;
+            .get_mut(storage_pos.q() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .get_mut(storage_pos.r() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .as_mut()
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+            .get_mut(storage_pos.z() as usize)
+            .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos))) = block;
     }
-
-    fn index_out_of_bounds(q: usize, r: usize, z: usize) -> String {
+    fn index_out_of_bounds(pos: &IPos) -> String {
         format!(
             "Chunk lookup index out of bounds. Tried to access \
         (q={},r={},z={}). Expected axial coordinates relative to chunk; they should not exceed \
         chunk length/width/height.",
-            q, r, z
+            pos.q(),
+            pos.r(),
+            pos.z(),
         )
     }
 
-    pub fn new(position: IVec2) -> Self {
-        let elevation_noise = generate_noise(position, get_noise_profile(NoiseLayer::Elevation));
-        let humidity_noise = generate_noise(position, get_noise_profile(NoiseLayer::Humidity));
-        let temperature_noise =
-            generate_noise(position, get_noise_profile(NoiseLayer::Temperature));
+    pub fn from_noise(chunk_id: &ChunkId) -> Self {
+        let noise_pos = Chunk::storage_pos(&chunk_id.center_pos())
+            .as_xyz() // TODO: Do we need storage pos here?
+            .xy()
+            .as_dvec2();
+        let noise_bounds = IVec2::splat(CHUNK_BOUNDS as i32);
+        let elevation_noise = generate_noise(
+            noise_pos,
+            noise_bounds,
+            get_noise_profile(NoiseLayer::Elevation),
+        );
+        let humidity_noise = generate_noise(
+            noise_pos,
+            noise_bounds,
+            get_noise_profile(NoiseLayer::Humidity),
+        );
+        let temperature_noise = generate_noise(
+            noise_pos,
+            noise_bounds,
+            get_noise_profile(NoiseLayer::Temperature),
+        );
 
         let biomes = generate_biomes(humidity_noise, temperature_noise);
         let mut chunk = Chunk::default();
 
-        /////
         let mut min_elevation = 0.0;
         let mut max_elevation = 0.0;
         for ele in elevation_noise.iter() {
@@ -79,56 +117,53 @@ impl Chunk {
                 max_elevation = *ele;
             }
         }
-        println!(
-            "min elevation: {}, max elevation: {}",
-            min_elevation, max_elevation
-        );
+        // debug!(
+        //     "min elevation: {}, max elevation: {}",
+        //     min_elevation, max_elevation
+        // );
 
-        /////
+        for qr in Chunk::chunk_columns().iter() {
+            let noise_pos = Chunk::storage_pos(qr);
+            let index = (noise_pos.r() as usize * CHUNK_BOUNDS) + noise_pos.q() as usize;
+            let elevation = elevation_noise[index];
+            let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_HEIGHT as f64);
+            // debug!("Elevation: {} \t {}", elevation, z_elevation);
+            let biome_type = biomes[index];
 
-        for q in 0..CHUNK_DIMENSION_Q {
-            for r in 0..CHUNK_DIMENSION_R {
-                let elevation = elevation_noise[qr_to_index(IPos::new(q as i32, r as i32, 0))];
-                let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_DIMENSION_Z as f64);
-                // println!("z_elevation: {}", z_elevation);
-                let biome_type = biomes[qr_to_index(IPos::new(q as i32, r as i32, 0))];
-
-                for z in 0..CHUNK_DIMENSION_Z {
-                    let block_type = if z < z_elevation as usize {
-                        BlockType::Stone
-                    } else {
-                        BlockType::Air
-                    };
-
-                    chunk.set(
-                        q,
-                        r,
-                        z,
-                        Block {
-                            block_type,
-                            biome_type,
-                        },
-                    );
-                }
+            for z in 0..CHUNK_HEIGHT {
+                let block_type = if z < z_elevation as usize {
+                    BlockType::Stone
+                } else {
+                    BlockType::Air
+                };
+                let pos = qr.delta(0, 0, z as i32);
+                chunk.set(
+                    &pos,
+                    Block {
+                        block_type,
+                        biome_type,
+                    },
+                );
             }
         }
-
         chunk
     }
 
-    /// Generate a chunk consisting of columns of random height. Only for testing.
-    pub fn random() -> Self {
-        let distribution = Bernoulli::new(0.8).unwrap();
-        let mut chunk = Chunk::default();
-        (0..CHUNK_DIMENSION_Z).for_each(|z| {
-            (0..CHUNK_DIMENSION_R).for_each(|r| {
-                (0..CHUNK_DIMENSION_Q).for_each(|q| {
-                    if z == 0 {
-                        chunk.set(q, r, z, Block::default());
-                    }
+    /// A Vec of relative positions of all blocks in a chunk.
+    /// These are positions relative to the chunk's center.
+    /// TODO: Maybe return a 2-dimensional version of IPos here?
+    pub fn chunk_columns() -> Vec<IPos> {
+        let center = IPos::default();
+        let mut results = vec![center];
+        (1..=CHUNK_RADIUS).for_each(|ring_index| {
+            (0..6).for_each(|i| {
+                let mut pos_on_ring = center + IPos::direction(i) * ring_index as i32;
+                (0..ring_index).for_each(|j| {
+                    results.push(pos_on_ring);
+                    pos_on_ring = pos_on_ring.neighbour(i + 2);
                 });
             });
         });
-        chunk
+        results
     }
 }

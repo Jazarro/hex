@@ -11,7 +11,7 @@ pub const HEIGHT: f32 = 1.;
 /// Long radius (distance between center and corner point) of a standard hex block in meters.
 pub const RADIUS: f32 = 0.6;
 /// The square root of three. Precalculated for performance and ease of use.
-const SQRT_THREE: f32 = 1.7320508;
+pub const SQRT_THREE: f32 = 1.7320508;
 /// One sixth Tau or one third Pi. Convenience constant because Tau is just nicer.
 pub const FRAC_TAU_6: f32 = std::f32::consts::FRAC_PI_3;
 /// Distance away from the origin in a regular 'square' coordinate system for every 1m distance
@@ -22,7 +22,7 @@ const XY_PER_Q: Vec2 = Vec2::new(3. / 2., SQRT_THREE / 2.);
 const XY_PER_R: Vec2 = Vec2::new(0., SQRT_THREE);
 /// Distance away from the origin in a flat-topped axial coordinate system for every 1m distance
 /// along the x-axis in a regular 'square' coordinate system.
-const QR_PER_X: Vec2 = Vec2::new(3. / 2., 1. / 3.);
+const QR_PER_X: Vec2 = Vec2::new(2. / 3., -1. / 3.);
 /// Distance away from the origin in a flat-topped axial coordinate system for every 1m distance
 /// along the y-axis in a regular 'square' coordinate system.
 const QR_PER_Y: Vec2 = Vec2::new(0., SQRT_THREE / 3.);

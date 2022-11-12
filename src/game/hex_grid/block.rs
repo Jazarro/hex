@@ -18,7 +18,7 @@ pub struct Block {
 impl Default for Block {
     fn default() -> Self {
         Block {
-            block_type: BlockType::Stone,
+            block_type: BlockType::Air,
             biome_type: BiomeType::Grassland,
         }
     }
