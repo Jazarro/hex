@@ -1,5 +1,5 @@
 use bevy::math::IVec2;
-use bevy::utils::HashMap;
+use bevy::utils::{HashMap, HashSet};
 
 use crate::game::hex_grid::axial::{ChunkId, IPos};
 use crate::game::hex_grid::block::Block;
@@ -7,10 +7,11 @@ use crate::game::hex_grid::chunk::{Chunk, CHUNK_BOUNDS};
 
 #[derive(Default)]
 pub struct Chunks {
-    pub chunks: HashMap<ChunkId, Chunk>,
+    chunks: HashMap<ChunkId, Chunk>,
 }
 
 impl Chunks {
+    #[must_use]
     pub fn block(&self, pos: &IPos) -> Option<&Block> {
         let chunk_id = ChunkId::from_block_pos(pos);
         let pos_relative = pos - &chunk_id.center_pos();
@@ -18,11 +19,21 @@ impl Chunks {
             .get(&chunk_id)
             .map(|chunk| chunk.block(&pos_relative))
     }
+    #[must_use]
     pub fn is_solid(&self, pos_absolute: &IPos) -> bool {
         self.block(pos_absolute)
             .map(|block| block.is_solid())
             .unwrap_or(false)
     }
+    /// Removes chunks from memory that are not in the given whitelist.
+    pub fn cull_chunks(&mut self, allowed: &HashSet<ChunkId>) {
+        let _ = self.chunks.drain_filter(|key, _| !allowed.contains(key));
+    }
+    #[must_use]
+    pub fn contains(&self, id: &ChunkId) -> bool {
+        self.chunks.contains_key(id)
+    }
+
     pub fn generate_chunk(&mut self, chunk_id: ChunkId) {
         let chunk = Chunk::from_noise(&chunk_id);
         self.chunks.insert(chunk_id, chunk);

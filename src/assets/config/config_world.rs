@@ -10,6 +10,16 @@ pub struct WorldConfig {
     pub sun_dawn: SunState,
     pub sun_noon: SunState,
     pub sun_dusk: SunState,
+
+    /// As long as chunks within this radius of the player are rendered, no loading / unloading will happen.
+    /// This value should equal at most the render_distance_max.
+    pub render_distance_min: u32,
+    /// When a load / unload is triggered, chunks within this radius will be rendered around the player.
+    /// If this is set to zero, only the chunk that the player is on will be rendered.
+    ///
+    /// Note that one additional ring of chunks will be loaded into memory, but not rendered.
+    /// This is primarily to make sure sides of chunks don't end up in the mesh unnecessarily.
+    pub render_distance_max: u32,
 }
 
 impl WorldConfig {

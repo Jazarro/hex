@@ -1,6 +1,6 @@
 use bevy::math::{IVec2, Vec3Swizzles};
 
-use crate::game::hex_grid::axial::{ChunkId, IPos};
+use crate::game::hex_grid::axial::{ChunkId, ColumnId, IPos};
 use crate::game::hex_grid::biomes::generate_biomes;
 use crate::game::hex_grid::block::{Block, BlockType};
 use crate::game::hex_grid::chunks::map_value;
@@ -25,13 +25,13 @@ impl Default for Chunk {
             blocks: [[None; CHUNK_BOUNDS]; CHUNK_BOUNDS],
         };
         for pos in Chunk::chunk_columns().iter() {
-            let storage_pos = Chunk::storage_pos(pos);
+            let storage_pos = Chunk::column_to_storage_pos(pos);
             *chunk
                 .blocks
                 .get_mut(storage_pos.q() as usize)
-                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos)))
+                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(&pos.as_ipos(0))))
                 .get_mut(storage_pos.r() as usize)
-                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(pos))) =
+                .unwrap_or_else(|| panic!("{}", Self::index_out_of_bounds(&pos.as_ipos(0)))) =
                 Some([Block::default(); CHUNK_HEIGHT]);
         }
         chunk
@@ -44,6 +44,12 @@ impl Chunk {
     /// This is needed because the relative position can be negative; it spirals out from (0,0).
     fn storage_pos(relative_pos: &IPos) -> IPos {
         relative_pos + &IPos::new(CHUNK_RADIUS as i32, CHUNK_RADIUS as i32, 0)
+    }
+    /// Converts relative position (relative to the chunk center)
+    /// to storage position (internal array storage).
+    /// This is needed because the relative position can be negative; it spirals out from (0,0).
+    fn column_to_storage_pos(relative_pos: &ColumnId) -> ColumnId {
+        relative_pos + &ColumnId::new(CHUNK_RADIUS as i32, CHUNK_RADIUS as i32)
     }
     #[must_use]
     pub fn block(&self, pos: &IPos) -> &Block {
@@ -123,7 +129,7 @@ impl Chunk {
         // );
 
         for qr in Chunk::chunk_columns().iter() {
-            let noise_pos = Chunk::storage_pos(qr);
+            let noise_pos = Chunk::column_to_storage_pos(qr);
             let index = (noise_pos.r() as usize * CHUNK_BOUNDS) + noise_pos.q() as usize;
             let elevation = elevation_noise[index];
             let z_elevation = map_value(elevation, -1.0, 1.0, 0.0, CHUNK_HEIGHT as f64);
@@ -136,7 +142,7 @@ impl Chunk {
                 } else {
                     BlockType::Air
                 };
-                let pos = qr.delta(0, 0, z as i32);
+                let pos = qr.as_ipos(z as i32);
                 chunk.set(
                     &pos,
                     Block {
@@ -151,19 +157,7 @@ impl Chunk {
 
     /// A Vec of relative positions of all blocks in a chunk.
     /// These are positions relative to the chunk's center.
-    /// TODO: Maybe return a 2-dimensional version of IPos here?
-    pub fn chunk_columns() -> Vec<IPos> {
-        let center = IPos::default();
-        let mut results = vec![center];
-        (1..=CHUNK_RADIUS).for_each(|ring_index| {
-            (0..6).for_each(|i| {
-                let mut pos_on_ring = center + IPos::direction(i) * ring_index as i32;
-                (0..ring_index).for_each(|j| {
-                    results.push(pos_on_ring);
-                    pos_on_ring = pos_on_ring.neighbour(i + 2);
-                });
-            });
-        });
-        results
+    pub fn chunk_columns() -> Vec<ColumnId> {
+        ColumnId::spiral(CHUNK_RADIUS as u32)
     }
 }

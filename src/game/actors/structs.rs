@@ -1,3 +1,4 @@
+use crate::game::hex_grid::chunk_loading::ChunkLoader;
 use bevy::{
     prelude::{Bundle, Component},
     transform::TransformBundle,
@@ -13,6 +14,7 @@ pub struct PlayerBundle {
     pub(crate) player_tag: Player,
     pub(crate) move_params: MoveParams,
     pub(crate) move_state: MoveState,
+    pub(crate) chunk_loader: ChunkLoader,
     #[bundle]
     pub transform: TransformBundle,
 }

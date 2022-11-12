@@ -6,6 +6,7 @@ use crate::game::hex_grid::axial::{ChunkId, IPos, FRAC_TAU_6};
 use crate::game::hex_grid::chunk::{Chunk, CHUNK_HEIGHT};
 use crate::game::hex_grid::chunks::Chunks;
 
+/// Only for testing. Maybe delete this at some point.
 pub fn spawn_test_grid(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -27,7 +28,7 @@ pub fn spawn_test_grid(
 
             for (i, block_pos) in Chunk::chunk_columns()
                 .iter()
-                .map(|relative_pos| relative_pos + &chunk_pos.center_pos())
+                .map(|relative_pos| relative_pos + chunk_pos.center_pos())
                 .enumerate()
             {
                 let mut xyz = block_pos.as_xyz();
@@ -48,39 +49,6 @@ pub fn spawn_test_grid(
                     ..default()
                 });
             }
-        }
-    }
-}
-
-pub fn spawn_chunk_new(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut std_mats: ResMut<Assets<StandardMaterial>>,
-) {
-    let mut chunks = Chunks::default();
-    for chunk_r in 0..8 {
-        for chunk_q in 0..8 {
-            let chunk_pos = ChunkId::new(chunk_q, chunk_r, 0);
-            chunks.generate_chunk(chunk_pos);
-        }
-    }
-    for chunk_r in 0..8 {
-        for chunk_q in 0..8 {
-            let chunk_pos = ChunkId::new(chunk_q, chunk_r, 0);
-            commands.spawn_bundle(MaterialMeshBundle {
-                mesh: meshes.add(create_chunk_mesh(&chunks, &chunk_pos)),
-                transform: Transform::default(),
-                material: std_mats.add(
-                    // Color::rgb(
-                    //     q as f32 / chunk::CHUNK_DIMENSION_Q as f32,
-                    //     r as f32 / chunk::CHUNK_DIMENSION_R as f32,
-                    //     z as f32 / chunk::CHUNK_DIMENSION_Z as f32,
-                    // )
-                    // .into(),
-                    Color::WHITE.into(),
-                ),
-                ..default()
-            });
         }
     }
 }
@@ -108,7 +76,7 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
             let normal_b = Vec3::new(angle_b.cos(), angle_b.sin(), 0.);
             let normal_face = ((normal_a + normal_b) / 2.).normalize();
             for z in 0..CHUNK_HEIGHT {
-                let pos_relative = pos.delta(0, 0, z as i32);
+                let pos_relative = pos.as_ipos(z as i32);
                 if !chunk.block(&pos_relative).is_solid() {
                     // This block isn't solid, so we obviously shouldn't include it in the mesh.
                     continue;
@@ -119,8 +87,8 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
                     // The neighbour is solid, so there is no point in rendering this face.
                     continue;
                 }
-                let (pos_a_bottom, pos_a_top) = calc_pos(angle_a, &pos_absolute);
-                let (pos_b_bottom, pos_b_top) = calc_pos(angle_b, &pos_absolute);
+                let (pos_a_bottom, pos_a_top) = calc_pos(angle_a, &pos_relative);
+                let (pos_b_bottom, pos_b_top) = calc_pos(angle_b, &pos_relative);
                 vertices.push((pos_a_bottom, normal_face, [1., 1.]));
                 vertices.push((pos_b_bottom, normal_face, [1., 1.]));
                 vertices.push((pos_a_top, normal_face, [1., 1.]));
@@ -132,7 +100,7 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
         });
         // Now add the top and bottom faces:
         for z in 0..CHUNK_HEIGHT {
-            let pos_relative = pos.delta(0, 0, z as i32);
+            let pos_relative = pos.as_ipos(z as i32);
             if !chunk.block(&pos_relative).is_solid() {
                 // This block isn't solid, so we obviously shouldn't include it in the mesh.
                 continue;
@@ -143,7 +111,7 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
                 // Check if the neighbour is solid. If so, we don't have to render this face:
                 let neighbour = pos_absolute + vertical_neighbours[j as usize];
                 if !chunks.is_solid(&neighbour) {
-                    let xyz = pos_absolute.delta(0, 0, j as i32).as_xyz();
+                    let xyz = pos_relative.delta(0, 0, j as i32).as_xyz();
                     let len = vertices.len() as u32;
                     // Center vertex:
                     vertices.push((xyz, vertical_normals[j as usize], [1., 1.]));

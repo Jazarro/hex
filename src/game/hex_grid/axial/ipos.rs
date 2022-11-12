@@ -30,6 +30,10 @@ impl IPos {
         ))
     }
     #[must_use]
+    pub fn from_xyz(xyz: &Vec3) -> Self {
+        Pos::from_xyz(xyz).as_ipos_round()
+    }
+    #[must_use]
     pub fn q(&self) -> i32 {
         self.0.x
     }
