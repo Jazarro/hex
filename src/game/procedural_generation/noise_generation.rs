@@ -135,7 +135,7 @@ pub fn generate_noise(position: DVec2, bounds: IVec2, profile: NoiseProfile) -> 
             let mut noise_value: f64 = 0.0;
 
             for i in 0..octaves {
-                let mut q_sample = x as f64 + row_offset as f64 + position.x; // * CHUNK_WIDTH ???
+                let mut q_sample = x as f64 + row_offset + position.x; // * CHUNK_WIDTH ???
                 let mut r_sample = y as f64 + position.y; // * CHUNK_HEIGHT ???
                 q_sample = (q_sample - half_width) / scale * frequency
                     + octave_offsets[i as usize].x as f64;

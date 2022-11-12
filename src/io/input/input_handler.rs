@@ -1,8 +1,8 @@
-use std::marker::PhantomData;
-
+use bevy::ecs::system::Resource;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use std::marker::PhantomData;
 
 use crate::game::movement::direction::Direction1D;
 use crate::io::config::InputConfig;
@@ -85,6 +85,7 @@ impl InputHandler<'_, '_> {
 /// We can create ProcessedInput from InputConfig. We perform pre-processing on the input
 /// config to auto-generate modifier exclusions (see BindingParameters::blocked). This keeps the
 /// config file syntax nice and clean while also making it easy and fast to query the data at runtime.
+#[derive(Resource)]
 pub struct ProcessedBindings(HashMap<String, ProcessedBindingGroup>);
 
 /// All bindings within a certain group.

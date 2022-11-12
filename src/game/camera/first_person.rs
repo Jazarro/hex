@@ -4,6 +4,8 @@ use bevy::prelude::{
     Bundle, Camera3dBundle, Component, EulerRot, EventReader, Query, Res, ResMut, Time, Transform,
     Vec2, Windows,
 };
+use bevy::window::CursorGrabMode::Confined;
+
 #[derive(Default, Component)]
 pub struct PlayerCamera {
     pub height: f32,
@@ -46,6 +48,6 @@ pub fn position_player_camera(mut q: Query<(&mut Transform, &mut PlayerCamera)>)
 
 pub fn cursor_grab(mut windows: ResMut<Windows>) {
     let window = windows.get_primary_mut().unwrap();
-    window.set_cursor_lock_mode(true);
+    window.set_cursor_grab_mode(Confined);
     window.set_cursor_visibility(false);
 }

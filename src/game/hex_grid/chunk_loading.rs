@@ -125,7 +125,7 @@ pub fn load_unload_chunks(
         .filter(|id| !are_rendered.contains(id))
         .for_each(|id| {
             commands
-                .spawn_bundle(MaterialMeshBundle {
+                .spawn(MaterialMeshBundle {
                     mesh: meshes.add(create_chunk_mesh(&chunks, id)),
                     transform: Transform::from_translation(id.center_pos().as_xyz()),
                     material: std_mats.add(Color::WHITE.into()),

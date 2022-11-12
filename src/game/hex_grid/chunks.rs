@@ -4,8 +4,8 @@ use bevy::utils::{HashMap, HashSet};
 use crate::game::hex_grid::axial::{ChunkId, IPos};
 use crate::game::hex_grid::block::Block;
 use crate::game::hex_grid::chunk::{Chunk, CHUNK_BOUNDS};
-
-#[derive(Default)]
+use bevy::ecs::system::Resource;
+#[derive(Default, Resource)]
 pub struct Chunks {
     chunks: HashMap<ChunkId, Chunk>,
 }

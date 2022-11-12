@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-
 use bevy::asset::{AssetLoader, BoxedFuture, Handle, HandleId, LoadContext, LoadedAsset};
+use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::io::config::Config;
 
@@ -14,12 +14,12 @@ use crate::io::config::Config;
 /// loading order.
 pub trait MergingAsset {
     fn merge(&self, accumulator: Option<Self>) -> Self
-        where
-            Self: Sized;
+    where
+        Self: Sized;
 }
 
 /// Used to temporarily store asset handles during loading time.
-#[derive(Default)]
+#[derive(Resource, Default)]
 pub struct LoaderHandles {
     pub mod_order: Handle<MetaAsset>,
     pub file_structure: Handle<MetaAsset>,
@@ -45,7 +45,7 @@ impl LoaderHandles {
                 .get(key)
                 .unwrap()
                 .iter()
-                .map(|handle| handle.id)
+                .map(|handle| handle.id())
                 .for_each(|id| vec.push(id));
         }
         vec

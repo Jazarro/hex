@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy::time::TimerMode::Repeating;
 use splines::Spline;
 
 use crate::game::meshes::hexagon::create_single_block_mesh;
@@ -19,7 +20,7 @@ pub fn spawn_sun(
     mut std_mats: ResMut<Assets<StandardMaterial>>,
 ) {
     commands
-        .spawn_bundle(DirectionalLightBundle {
+        .spawn(DirectionalLightBundle {
             directional_light: DirectionalLight {
                 illuminance: 100_000.,
                 shadows_enabled: true,
@@ -30,14 +31,14 @@ pub fn spawn_sun(
         })
         .insert(Sun::default())
         .with_children(|parent| {
-            parent.spawn_bundle(MaterialMeshBundle {
+            parent.spawn(MaterialMeshBundle {
                 mesh: meshes.add(create_single_block_mesh()),
                 material: std_mats.add(Color::YELLOW.into()),
                 transform: Transform::default().with_scale(Vec3::splat(10.)),
                 ..default()
             });
         });
-    let mut timer = Timer::from_seconds(world_config.day_night_duration_seconds, true);
+    let mut timer = Timer::from_seconds(world_config.day_night_duration_seconds, Repeating);
     timer.set_elapsed(Duration::from_secs_f32(
         world_config.day_night_duration_seconds * 3. / 8.,
     )); // <== At game start, set the time to 9:00 AM.
@@ -51,6 +52,7 @@ pub fn spawn_sun(
     });
 }
 
+#[derive(Resource)]
 pub struct DayNight {
     pub paused: bool,
     pub timer: Timer,

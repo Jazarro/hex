@@ -46,7 +46,7 @@ pub fn spawn_debug_lines(
     };
     let max = config.origin_lines_length;
     // x-axis: Red
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(LineList {
             lines: vec![(Vec3::new(min, 0., 0.), Vec3::new(max, 0., 0.))],
         })),
@@ -54,7 +54,7 @@ pub fn spawn_debug_lines(
         material: line_mats.add(LineMaterial { color: Color::RED }),
         ..default()
     });
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(Cone::default())),
         transform: Transform::from_xyz(max, 0., 0.)
             .with_scale(Vec3::splat(config.origin_lines_cone_scale))
@@ -63,7 +63,7 @@ pub fn spawn_debug_lines(
         ..default()
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
-        commands.spawn_bundle(MaterialMeshBundle {
+        commands.spawn(MaterialMeshBundle {
             mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(min, 0., 0.)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))
@@ -73,7 +73,7 @@ pub fn spawn_debug_lines(
         });
     }
     // y-axis: Green
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(LineList {
             lines: vec![(Vec3::new(0., min, 0.), Vec3::new(0., max, 0.))],
         })),
@@ -83,7 +83,7 @@ pub fn spawn_debug_lines(
         }),
         ..default()
     });
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(Cone::default())),
         transform: Transform::from_xyz(0., max, 0.)
             .with_scale(Vec3::splat(config.origin_lines_cone_scale)),
@@ -91,7 +91,7 @@ pub fn spawn_debug_lines(
         ..default()
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
-        commands.spawn_bundle(MaterialMeshBundle {
+        commands.spawn(MaterialMeshBundle {
             mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(0., min, 0.)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))
@@ -101,7 +101,7 @@ pub fn spawn_debug_lines(
         });
     }
     // z-axis: Blue
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(LineList {
             lines: vec![(Vec3::new(0., 0., min), Vec3::new(0., 0., max))],
         })),
@@ -109,7 +109,7 @@ pub fn spawn_debug_lines(
         material: line_mats.add(LineMaterial { color: Color::BLUE }),
         ..default()
     });
-    commands.spawn_bundle(MaterialMeshBundle {
+    commands.spawn(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(Cone::default())),
         transform: Transform::from_xyz(0., 0., max)
             .with_scale(Vec3::splat(config.origin_lines_cone_scale))
@@ -118,7 +118,7 @@ pub fn spawn_debug_lines(
         ..default()
     });
     if matches!(config.origin_lines_display, OriginLinesDisplay::Both) {
-        commands.spawn_bundle(MaterialMeshBundle {
+        commands.spawn(MaterialMeshBundle {
             mesh: meshes.add(Mesh::from(Cone::stumpy())),
             transform: Transform::from_xyz(0., 0., min)
                 .with_scale(Vec3::splat(config.origin_lines_cone_scale))

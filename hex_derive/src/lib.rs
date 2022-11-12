@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 
 use quote::{format_ident, quote, quote_spanned};
-use syn::{Data, DeriveInput};
 use syn::spanned::Spanned;
+use syn::{Data, DeriveInput};
 
 #[proc_macro_derive(SfxId)]
 pub fn derive_sfx_id(input: TokenStream) -> TokenStream {

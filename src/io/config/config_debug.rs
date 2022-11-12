@@ -1,7 +1,8 @@
 use crate::game::meshes::debug_lines::OriginLinesDisplay;
+use bevy::ecs::system::Resource;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+#[derive(Debug, Default, Deserialize, Serialize, Resource, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct DebugConfig {
     pub origin_lines_display: OriginLinesDisplay,

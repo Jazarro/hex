@@ -73,7 +73,7 @@ pub fn load_manifests(
         info!("\t...loading mods/{}/manifest.meta.ron", mod_name);
         handles.manifests.insert(
             mod_name.to_string(),
-            server.load(&format!("{}/manifest.meta.ron", mod_name)),
+            server.load(format!("{}/manifest.meta.ron", mod_name)),
         );
     }
     commands.insert_resource(NextState(LoadProcess::WaitForManifests));

@@ -1,4 +1,5 @@
 use bevy::math::{IVec2, Vec3Swizzles};
+use bevy::prelude::*;
 
 use crate::game::hex_grid::axial::{ChunkId, ColumnId, IPos};
 use crate::game::hex_grid::biomes::generate_biomes;
@@ -12,6 +13,7 @@ pub const CHUNK_RADIUS: usize = 8;
 pub const CHUNK_HEIGHT: usize = 32;
 pub const CHUNK_BOUNDS: usize = CHUNK_RADIUS * 2 + 1;
 
+#[derive(Resource)]
 pub struct Chunk {
     /// Outer array is Q-coordinate. Second array is R-coordinate. Inner array is Z-coordinate.
     /// Since chunks are hexagonal, not all columns in a square array exist.

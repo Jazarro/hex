@@ -15,7 +15,7 @@ use super::structs::PlayerBundle;
 
 pub fn setup_player(mut command: Commands, config: Res<WorldConfig>) {
     command
-        .spawn_bundle(PlayerBundle {
+        .spawn(PlayerBundle {
             move_params: MoveParams {
                 accel: 14.4,
                 max_speed: 11.1,
@@ -33,7 +33,7 @@ pub fn setup_player(mut command: Commands, config: Res<WorldConfig>) {
             ..Default::default()
         })
         .with_children(|parent| {
-            parent.spawn_bundle(PlayerCameraBundle {
+            parent.spawn(PlayerCameraBundle {
                 player_cam: PlayerCamera {
                     height: 1.5,
                     x_rot_max_deg: 85.0,

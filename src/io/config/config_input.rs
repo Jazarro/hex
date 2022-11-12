@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::io::asset_loading::MergingAsset;
 use crate::io::input::binding::InputBinding;
-
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+use bevy::ecs::system::Resource;
+#[derive(Debug, Default, Deserialize, Serialize, Resource, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct InputConfig {
     pub bindings: HashMap<String, HashMap<String, Vec<InputBinding>>>,

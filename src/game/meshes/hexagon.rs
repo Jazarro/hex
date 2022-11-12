@@ -14,9 +14,9 @@ pub fn spawn_test_grid(
 ) {
     for chunk_r in 0..8 {
         for chunk_q in 0..8 {
-            let chunk_pos = ChunkId::new(chunk_q as i32, chunk_r as i32, 0);
+            let chunk_pos = ChunkId::new(chunk_q, chunk_r, 0);
             // info!("Chunk: {:?}, center at: {:?}", chunk_pos, chunk_pos.center_pos());
-            commands.spawn_bundle(MaterialMeshBundle {
+            commands.spawn(MaterialMeshBundle {
                 mesh: meshes.add(create_single_block_mesh()),
                 transform: Transform::from_translation(
                     chunk_pos.center_pos().as_xyz()
@@ -34,7 +34,7 @@ pub fn spawn_test_grid(
                 xyz.z += if chunk_q % 2 == 0 { 0. } else { 0.1 };
                 xyz.z += (chunk_q + chunk_r) as f32 * 0.5;
                 let what_chunk_it_thinks_it_belongs_to = ChunkId::from_block_pos(&block_pos);
-                commands.spawn_bundle(MaterialMeshBundle {
+                commands.spawn(MaterialMeshBundle {
                     mesh: meshes.add(create_single_block_mesh()),
                     transform: Transform::from_translation(xyz),
                     material: std_mats.add(
