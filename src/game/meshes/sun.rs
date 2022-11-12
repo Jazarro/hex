@@ -51,6 +51,7 @@ pub fn spawn_sun(
     });
 }
 
+#[derive(Resource)]
 pub struct DayNight {
     pub paused: bool,
     pub timer: Timer,

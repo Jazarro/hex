@@ -1,8 +1,8 @@
 use bevy::prelude::Color;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use splines::{Interpolation, Key, Spline};
-
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+#[derive(Resource, Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct WorldConfig {
     pub day_night_duration_seconds: f32,

@@ -8,8 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::assets::loading::meta::MergingAsset;
 use crate::game::movement::direction::Direction1D;
-
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+#[derive(Resource, Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct KeysConfig {
     map: HashMap<InputAction, Vec<InputBinding>>,

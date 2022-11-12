@@ -19,11 +19,11 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-egui = "0.18.1"
-bevy_egui = "0.15.1"
+egui = "0.19.0"
+bevy_egui = "0.16.1"
 bevy-inspector-egui = "0.13.0"
 bevy_kira_audio = { version = "0.12.0", features = ["ogg"] }
-iyes_loopless = "0.7.*"
+iyes_loopless = "0.8.0"
 noise = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 rand = "*"
@@ -31,7 +31,7 @@ ron = "*"
 splines = "4.1.1"
 
 [dependencies.bevy]
-version = "0.8.*"
+version = "0.9.*"
 # We must disable default features because we're using bevy_kira_audio:
 default-features = false
 # Now we have to add all default features we want back in:

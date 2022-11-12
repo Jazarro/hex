@@ -1,6 +1,6 @@
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Default, Deserialize, Serialize, Clone)]
+#[derive(Resource, Debug, Default, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct DebugConfig {
     pub origin_lines_display: OriginLinesDisplay,
