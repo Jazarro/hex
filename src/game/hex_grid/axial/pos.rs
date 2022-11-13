@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::ops::{Add, Sub};
 
 use bevy::prelude::*;
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
 use crate::game::hex_grid::axial::IPos;
@@ -14,18 +15,10 @@ pub const RADIUS: f32 = 0.6;
 pub const SQRT_THREE: f32 = 1.7320508;
 /// One sixth Tau or one third Pi. Convenience constant because Tau is just nicer.
 pub const FRAC_TAU_6: f32 = std::f32::consts::FRAC_PI_3;
-/// Distance away from the origin in a regular 'square' coordinate system for every 1m distance
-/// along the q-axis in the flat-topped axial coordinate system.
-const XY_PER_Q: Vec2 = Vec2::new(3. / 2., SQRT_THREE / 2.);
-/// Distance away from the origin in a regular 'square' coordinate system for every 1m distance
-/// along the r-axis in the flat-topped axial coordinate system.
-const XY_PER_R: Vec2 = Vec2::new(0., SQRT_THREE);
-/// Distance away from the origin in a flat-topped axial coordinate system for every 1m distance
-/// along the x-axis in a regular 'square' coordinate system.
-const QR_PER_X: Vec2 = Vec2::new(2. / 3., -1. / 3.);
-/// Distance away from the origin in a flat-topped axial coordinate system for every 1m distance
-/// along the y-axis in a regular 'square' coordinate system.
-const QR_PER_Y: Vec2 = Vec2::new(0., SQRT_THREE / 3.);
+/// Matrix for converting coordinates from xyz to qrz.
+static XYZ_TO_QRZ: OnceCell<Mat4> = OnceCell::new();
+/// Matrix for converting coordinates from qrz to xyz.
+static QRZ_TO_XYZ: OnceCell<Mat4> = OnceCell::new();
 
 /// A hexagonal coordinate in the flat-topped axial coordinate system.
 /// This is the floating-point version. There is also an integral version.
@@ -41,8 +34,10 @@ impl Pos {
     }
     #[must_use]
     pub fn from_xyz(xyz: &Vec3) -> Self {
-        let qr = (QR_PER_X * xyz.x + QR_PER_Y * xyz.y) / RADIUS;
-        Pos::new(qr.x, qr.y, xyz.z)
+        Pos(XYZ_TO_QRZ
+            .get()
+            .expect("Pos::setup() was never called!")
+            .transform_vector3(*xyz))
     }
     #[must_use]
     pub fn q(&self) -> f32 {
@@ -87,8 +82,10 @@ impl Pos {
     /// Convert axial coordinates to regular, square coordinates.
     #[must_use]
     pub fn as_xyz(&self) -> Vec3 {
-        let xy = (XY_PER_Q * self.q() + XY_PER_R * self.r()) * RADIUS;
-        Vec3::new(xy.x, xy.y, self.z())
+        QRZ_TO_XYZ
+            .get()
+            .expect("Pos::setup() was never called!")
+            .transform_vector3(self.0)
     }
     /// Round to the nearest integral hex.
     #[must_use]
@@ -113,6 +110,34 @@ impl Pos {
     pub fn distance(a: &Self, b: &Self) -> f32 {
         let delta = a - b;
         delta.q().max(delta.r()).max(delta.z())
+    }
+
+    /// Call this once at the start of the application.
+    pub(crate) fn setup() {
+        XYZ_TO_QRZ.set(Self::setup_xyz_to_qrz())
+            .expect("Setup was called twice, but you should only call it once at the start of the application.");
+        QRZ_TO_XYZ.set(Self::setup_qrz_to_xyz())
+            .expect("Setup was called twice, but you should only call it once at the start of the application.");
+    }
+    /// Do not call this outside of the setup stage.
+    pub(crate) fn setup_xyz_to_qrz() -> Mat4 {
+        Mat4::from_cols(
+            Vec4::new(2. / 3., -1. / 3., 0., 0.),
+            Vec4::new(0., SQRT_THREE / 3., 0., 0.),
+            Vec4::new(0., 0., 1., 0.),
+            Vec4::new(0., 0., 0., 1.),
+        )
+        .mul_scalar(1. / RADIUS)
+    }
+    /// Do not call this outside of the setup stage.
+    pub(crate) fn setup_qrz_to_xyz() -> Mat4 {
+        Mat4::from_cols(
+            Vec4::new(3. / 2., SQRT_THREE / 2., 0., 0.),
+            Vec4::new(0., SQRT_THREE, 0., 0.),
+            Vec4::new(0., 0., 1., 0.),
+            Vec4::new(0., 0., 0., 1.),
+        )
+        .mul_scalar(RADIUS)
     }
 }
 

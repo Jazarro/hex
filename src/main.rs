@@ -11,6 +11,7 @@ extern crate core;
 #[cfg(feature = "debugwindow")]
 use crate::debug_window::DebugWindowPlugin;
 
+use crate::game::hex_grid::axial::{ChunkId, Pos};
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
@@ -32,6 +33,10 @@ mod states;
 mod window_event_handler;
 
 fn main() {
+    // This is just setting up some static constants:
+    ChunkId::setup();
+    Pos::setup();
+
     let mut app = App::new();
     // this code is compiled only if debug assertions are enabled (debug mode)
     #[cfg(debug_assertions)]

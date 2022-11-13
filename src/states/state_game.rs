@@ -36,6 +36,7 @@ impl Plugin for GameState {
                 .with_system(spawn_sun)
                 .with_system(setup_player)
                 .with_system(spawn_debug_lines)
+                // .with_system(spawn_test_grid)
                 .into(),
         )
         // Checking to see if chunks must be loaded is only necessary every once in a while, not every tick:
