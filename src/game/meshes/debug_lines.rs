@@ -6,7 +6,6 @@ use bevy::render::render_resource::{
     AsBindGroup, PolygonMode, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError,
 };
 
-use crate::animate_simple::{RotAxis, RotateTag};
 use crate::assets::config::config_debug::DebugConfig;
 use crate::assets::config::config_debug::OriginLinesDisplay;
 use crate::{default, Color, MaterialMeshBundle, Mesh, Transform, Vec3};
@@ -112,24 +111,6 @@ pub fn spawn_debug_lines(
             ..default()
         });
     }
-}
-
-pub fn spawn_cone(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut std_mats: ResMut<Assets<StandardMaterial>>,
-) {
-    commands
-        .spawn_bundle(MaterialMeshBundle {
-            mesh: meshes.add(Mesh::from(Cone::default())),
-            transform: Transform::default().with_scale(Vec3::splat(20.)),
-            material: std_mats.add(Color::GREEN.into()),
-            ..default()
-        })
-        .insert(RotateTag {
-            timer: Timer::from_seconds(4., true),
-            axis: RotAxis::Chain,
-        });
 }
 
 /// A list of lines with a start and end position

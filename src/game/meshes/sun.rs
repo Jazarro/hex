@@ -98,14 +98,13 @@ pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNig
 
 pub fn animate_sun(
     time: Res<Time>,
-    config: Res<WorldConfig>,
     mut day_night: ResMut<DayNight>,
     mut query: Query<(&mut Transform, &mut DirectionalLight, &Sun)>,
 ) {
     if !day_night.paused {
         day_night.timer.tick(time.delta());
     }
-    for (mut transform, mut light, sun) in query.iter_mut() {
+    for (mut transform, mut light, _) in query.iter_mut() {
         light.illuminance = day_night
             .illuminance
             .clamped_sample(day_night.timer.percent())

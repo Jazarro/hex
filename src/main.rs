@@ -24,7 +24,6 @@ use crate::states::state_game::GameState;
 use crate::states::state_loading::LoadingState;
 use crate::window_event_handler::handle_window;
 
-mod animate_simple;
 mod assets;
 mod audio;
 mod debug_window;

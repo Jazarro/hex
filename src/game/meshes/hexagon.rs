@@ -26,10 +26,9 @@ pub fn spawn_test_grid(
                 ..default()
             });
 
-            for (i, block_pos) in Chunk::chunk_columns()
+            for block_pos in Chunk::chunk_columns()
                 .iter()
                 .map(|relative_pos| relative_pos + chunk_pos.center_pos())
-                .enumerate()
             {
                 let mut xyz = block_pos.as_xyz();
                 xyz.z += if chunk_q % 2 == 0 { 0. } else { 0.1 };
@@ -63,8 +62,6 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
         Vec3::new(0., 0., -1.), // <== Bottom normal
         Vec3::new(0., 0., 1.),  // <== Top normal
     ];
-    let normal_bottom = Vec3::new(0.0, 0.0, -1.0);
-    let normal_top = Vec3::new(0.0, 0.0, 1.0);
     let mut vertices = vec![];
     let mut indices = vec![];
     for pos in Chunk::chunk_columns().iter() {

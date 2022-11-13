@@ -43,8 +43,10 @@ impl Chunks {
         self.chunks.get(chunk_id).unwrap() // TODO: fix this unsafe unwrap?
     }
 
+    #[allow(dead_code)] // Will be implemented later.
     pub fn load_chunk_from_disk(position: IVec2) {}
 
+    #[allow(dead_code)] // Will be implemented later.
     pub fn save_chunk_to_disk(position: IVec2) {}
 }
 

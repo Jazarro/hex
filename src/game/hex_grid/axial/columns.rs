@@ -73,12 +73,11 @@ impl ColumnId {
         let mut results = vec![];
         // Loop through the six segments of the ring:
         (0..6).for_each(|i| {
-            let mut pos_on_ring = ColumnId::direction(i) * radius as i32;
+            let pos_on_ring = ColumnId::direction(i) * radius as i32;
             // Loop through each block on the ring segment.
             // This happens to be exactly radius steps.
             (0..radius).for_each(|j| {
-                results.push(pos_on_ring);
-                pos_on_ring = pos_on_ring.neighbour(i + 2);
+                results.push(pos_on_ring + ColumnId::direction(i + 2) * j as i32);
             });
         });
         results

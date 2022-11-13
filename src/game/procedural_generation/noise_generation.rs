@@ -109,7 +109,6 @@ pub fn generate_noise(position: DVec2, bounds: IVec2, profile: NoiseProfile) -> 
     let persistence = profile.persistence;
     let lacunarity = profile.lacunarity;
     let offset = profile.offset;
-    let threshold = profile.threshold;
     let random_q_values = profile.random_q_values;
     let random_r_values = profile.random_r_values;
 

@@ -146,15 +146,10 @@ pub fn check_files_are_present(
 
 pub fn resolve_mods(
     mut commands: Commands,
-    server: Res<AssetServer>,
     handles: Res<LoaderHandles>,
     meta_assets: Res<Assets<MetaAsset>>,
     configs: Res<Assets<Config>>,
 ) {
-    let mod_order = meta_assets.get(&handles.mod_order);
-    let mod_order = mod_order
-        .expect("mod_order.meta.ron wasn't loaded (yet)!")
-        .as_mod_order();
     let file_structure = meta_assets.get(&handles.file_structure);
     let file_structure = file_structure
         .expect("file_structure.meta.ron wasn't loaded (yet)!")

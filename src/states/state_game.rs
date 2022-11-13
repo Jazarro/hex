@@ -6,7 +6,6 @@ use bevy::prelude::*;
 use iyes_loopless::condition::ConditionSet;
 use iyes_loopless::prelude::{AppLooplessFixedTimestepExt, AppLooplessStateExt};
 
-use crate::animate_simple::rotate;
 use crate::game::actors::player::setup_player;
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::{
@@ -58,7 +57,6 @@ impl Plugin for GameState {
                 .run_in_state(AppState::Game)
                 .with_system(process_day_night_input)
                 .with_system(animate_sun)
-                .with_system(rotate)
                 .with_system(player_movement_system)
                 .with_system(rotate_player_camera)
                 .with_system(position_player_camera)
