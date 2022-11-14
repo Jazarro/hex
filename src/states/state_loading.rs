@@ -4,12 +4,8 @@ use bevy::prelude::Commands;
 use iyes_loopless::condition::ConditionSet;
 use iyes_loopless::prelude::*;
 
-use crate::assets::config::configs::{Config, ConfigLoader};
-use crate::assets::loading::loader::{
-    check_files_are_present, check_manifests_are_present, check_mod_order_is_present, load_files,
-    load_manifests, load_mod_order, resolve_mods,
-};
-use crate::assets::loading::meta::{MetaAsset, MetaLoader};
+use crate::io::asset_loading::*;
+use crate::io::config::{Config, ConfigLoader};
 use crate::states::appstate::AppState;
 
 pub struct LoadingState;
@@ -85,20 +81,6 @@ impl Plugin for LoadingState {
                     .into(),
             );
     }
-}
-
-/// These are sub-states that the loading state works through.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub enum LoadProcess {
-    StartLoading,
-    LoadModOrder,
-    WaitForModOrder,
-    LoadManifests,
-    WaitForManifests,
-    LoadFiles,
-    WaitForFiles,
-    ResolveMods,
-    DoneLoading,
 }
 
 fn init_load_process(mut commands: Commands) {

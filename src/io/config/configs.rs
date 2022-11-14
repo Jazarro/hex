@@ -1,13 +1,10 @@
+use crate::io::asset_loading::MergingAsset;
 use bevy::asset::{AssetLoader, BoxedFuture, LoadContext, LoadedAsset};
 use bevy::prelude::Commands;
 use bevy::reflect::TypeUuid;
 use serde::{Deserialize, Serialize};
 
-use crate::assets::config::config_audio::AudioConfig;
-use crate::assets::config::config_debug::DebugConfig;
-use crate::assets::config::config_keys::KeysConfig;
-use crate::assets::config::config_world::WorldConfig;
-use crate::assets::loading::meta::MergingAsset;
+use crate::io::config::{AudioConfig, DebugConfig, InputConfig, WorldConfig};
 
 /// This wrapper around the different config types is needed to create a single AssetLoader for
 /// all configs. Otherwise we'd need to implement a separate AssetLoader per config type.
@@ -17,7 +14,7 @@ use crate::assets::loading::meta::MergingAsset;
 pub enum Config {
     Audio(AudioConfig),
     Debug(DebugConfig),
-    Keys(KeysConfig),
+    Keys(InputConfig),
     World(WorldConfig),
 }
 

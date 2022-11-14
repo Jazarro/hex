@@ -5,10 +5,26 @@ use bevy::render::mesh::{Indices, MeshVertexBufferLayout, PrimitiveTopology};
 use bevy::render::render_resource::{
     AsBindGroup, PolygonMode, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError,
 };
+use serde::{Deserialize, Serialize};
 
-use crate::assets::config::config_debug::DebugConfig;
-use crate::assets::config::config_debug::OriginLinesDisplay;
+use crate::io::config::DebugConfig;
 use crate::{default, Color, MaterialMeshBundle, Mesh, Transform, Vec3};
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum OriginLinesDisplay {
+    /// Don't display at all.
+    Disabled,
+    /// Display lines going into the positive directions.
+    Positive,
+    /// Display lines going into both positive and negative directions.
+    Both,
+}
+
+impl Default for OriginLinesDisplay {
+    fn default() -> Self {
+        OriginLinesDisplay::Positive
+    }
+}
 
 /// Lines are XYZ -> RGB. X is Red, Y is Green, Z is Blue.
 /// If the lines are also drawn towards the negative, then the cones atop those lines will be

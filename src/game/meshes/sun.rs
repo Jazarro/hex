@@ -3,10 +3,10 @@ use std::time::Duration;
 use bevy::prelude::*;
 use splines::Spline;
 
-use crate::assets::config::config_debug::DebugConfig;
-use crate::assets::config::config_keys::{InputAction, InputHandler};
-use crate::assets::config::config_world::WorldConfig;
 use crate::game::meshes::hexagon::create_single_block_mesh;
+use crate::io::config::DebugConfig;
+use crate::io::config::WorldConfig;
+use crate::io::input::{InputAction, InputHandler};
 
 #[derive(Component, Default)]
 pub struct Sun;

@@ -35,7 +35,7 @@ impl Plugin for DebugWindowPlugin {
     }
 }
 
-pub fn create_new_window(
+fn create_new_window(
     mut create_window_events: EventWriter<CreateWindow>,
     mut params: ResMut<WorldInspectorParams>,
 ) {
@@ -54,7 +54,7 @@ pub fn create_new_window(
 }
 
 // This is a global look for egui
-pub fn configure_egui_look(mut egui_ctx: ResMut<EguiContext>) {
+fn configure_egui_look(mut egui_ctx: ResMut<EguiContext>) {
     egui_ctx.ctx_mut().set_visuals(egui::Visuals {
         window_rounding: 0.0.into(),
         ..Default::default()

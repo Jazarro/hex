@@ -1,3 +1,7 @@
-pub mod appstate;
-pub mod state_game;
-pub mod state_loading;
+pub use self::appstate::AppState;
+pub use self::state_game::GameState;
+pub use self::state_loading::LoadingState;
+
+mod appstate;
+mod state_game;
+mod state_loading;

@@ -4,12 +4,12 @@ use bevy::{
     transform::TransformBundle,
 };
 
-use crate::assets::config::config_world::WorldConfig;
 use crate::game::hex_grid::chunk_loading::ChunkLoader;
 use crate::game::{
     camera::first_person::{PlayerCamera, PlayerCameraBundle},
     movement::structs::MoveParams,
 };
+use crate::io::config::WorldConfig;
 
 use super::structs::PlayerBundle;
 

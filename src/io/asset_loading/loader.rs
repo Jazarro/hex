@@ -1,10 +1,23 @@
+use crate::io::asset_loading::meta::{LoaderHandles, MetaAsset};
+use crate::io::asset_loading::MergingAsset;
+use crate::io::config::Config;
 use bevy::asset::{AssetServer, LoadState};
 use bevy::prelude::*;
 use iyes_loopless::prelude::NextState;
 
-use crate::assets::config::configs::Config;
-use crate::assets::loading::meta::{LoaderHandles, MergingAsset, MetaAsset};
-use crate::states::state_loading::LoadProcess;
+/// These are sub-states that the loading state works through.
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum LoadProcess {
+    StartLoading,
+    LoadModOrder,
+    WaitForModOrder,
+    LoadManifests,
+    WaitForManifests,
+    LoadFiles,
+    WaitForFiles,
+    ResolveMods,
+    DoneLoading,
+}
 
 /// Executes during LoadingState if LoadOrder isn't present as resource.
 pub fn load_mod_order(mut commands: Commands, server: Res<AssetServer>) {

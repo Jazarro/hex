@@ -1,13 +1,10 @@
 use bevy::input::mouse::MouseMotion;
-use bevy::prelude::{
-    Camera, EventReader, Quat, Query, Res, Time, Transform, Vec2, Vec3, With, Without,
-};
+use bevy::prelude::*;
 
-use crate::assets::config::config_keys::{InputAction, InputHandler};
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
-use crate::game::movement::structs::{MoveParams, MoveState};
-use crate::{EulerRot, MoveInput};
+use crate::game::movement::structs::{MoveInput, MoveParams, MoveState};
+use crate::io::input::{InputAction, InputHandler};
 
 pub fn player_movement_system(
     mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,

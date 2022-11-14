@@ -9,27 +9,20 @@
 extern crate core;
 
 #[cfg(feature = "debugwindow")]
-use crate::debug_window::DebugWindowPlugin;
+use crate::io::window::DebugWindowPlugin;
 
 use crate::game::hex_grid::axial::{ChunkId, Pos};
+use crate::game::meshes::debug_lines::LineMaterial;
+use crate::io::window::handle_window;
+use crate::states::*;
 use bevy::log::{Level, LogSettings};
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
 use iyes_loopless::prelude::{AppLooplessStateExt, CurrentState};
 
-use crate::game::meshes::debug_lines::LineMaterial;
-use crate::game::movement::structs::MoveInput;
-use crate::states::appstate::AppState;
-use crate::states::state_game::GameState;
-use crate::states::state_loading::LoadingState;
-use crate::window_event_handler::handle_window;
-
-mod assets;
-mod audio;
-mod debug_window;
 mod game;
+mod io;
 mod states;
-mod window_event_handler;
 
 fn main() {
     // This is just setting up some static constants:

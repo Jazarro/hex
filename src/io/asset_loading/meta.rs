@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 
+use crate::io::config::Config;
 use bevy::asset::{AssetLoader, BoxedFuture, Handle, HandleId, LoadContext, LoadedAsset};
 use bevy::reflect::TypeUuid;
 use serde::{Deserialize, Serialize};
-
-use crate::assets::config::configs::Config;
 
 /// Implement for any assets that can merge together different versions from different mods.
 /// Instead of wholesale replacing the file with the overriding one from a mod later in the mod
