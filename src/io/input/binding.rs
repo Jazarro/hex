@@ -21,7 +21,7 @@ pub enum InputBinding {
     // TODO: Scroll wheel Up & Down
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(deny_unknown_fields)]
 pub enum SignalState {
     /// Key is down, doesn't matter how long it's been down.

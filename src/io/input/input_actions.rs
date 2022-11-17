@@ -2,6 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use hex_derive::InputAction;
 
+/// This trait serves to abstract away things like keyboard keys and mouse buttons, the normal
+/// game code should be completely agnostic of those specific input types.
+///
 /// Identifies an action that you can request user input for.
 /// Each input action may be bound to multiple combinations of keyboard or mouse input.
 ///

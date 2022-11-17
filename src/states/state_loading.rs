@@ -6,6 +6,7 @@ use iyes_loopless::prelude::*;
 
 use crate::io::asset_loading::*;
 use crate::io::config::{Config, ConfigLoader};
+use crate::io::input::process_input_bindings;
 use crate::states::appstate::AppState;
 
 pub struct LoadingState;
@@ -78,6 +79,7 @@ impl Plugin for LoadingState {
                     .run_in_state(AppState::Loading)
                     .run_in_state(LoadProcess::DoneLoading)
                     .with_system(exit_loading_state)
+                    .with_system(process_input_bindings)
                     .into(),
             );
     }
