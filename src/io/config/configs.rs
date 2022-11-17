@@ -14,7 +14,7 @@ use crate::io::config::{AudioConfig, DebugConfig, InputConfig, WorldConfig};
 pub enum Config {
     Audio(AudioConfig),
     Debug(DebugConfig),
-    Keys(InputConfig),
+    Input(InputConfig),
     World(WorldConfig),
 }
 
@@ -27,7 +27,7 @@ impl Config {
             Config::Debug(value) => {
                 commands.insert_resource(value);
             }
-            Config::Keys(value) => {
+            Config::Input(value) => {
                 commands.insert_resource(value);
             }
             Config::World(value) => {
@@ -43,11 +43,11 @@ impl MergingAsset for Config {
             Config::Audio(_) => self.clone(),
             Config::Debug(_) => self.clone(),
             Config::World(_) => self.clone(),
-            Config::Keys(value) => {
-                if let Some(Config::Keys(accumulator)) = accumulator {
-                    Config::Keys(value.merge(Some(accumulator)))
+            Config::Input(value) => {
+                if let Some(Config::Input(accumulator)) = accumulator {
+                    Config::Input(value.merge(Some(accumulator)))
                 } else if accumulator.is_none() {
-                    Config::Keys(value.merge(None))
+                    Config::Input(value.merge(None))
                 } else {
                     panic!(
                         "Something went wrong, accumulator was not the same type as the \

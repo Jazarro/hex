@@ -1,18 +1,20 @@
-Keys((
-    map: {
-        // Player movement:
-        Forward: [Key(W, Pressed), Key(Up, Pressed)],
-        Backward: [Key(S, Pressed), Key(Down, Pressed)],
-        Left: [Key(A, Pressed), Key(Left, Pressed)],
-        Right: [Key(D, Pressed), Key(Right, Pressed)],
-        Up: [Key(Space, Pressed)],
-        Down: [Key(LControl, Pressed), Key(C, Pressed)],
-        Sprint: [Key(LShift, Pressed)],
-        // Debug time controls:
-        PauseTime: [Key(P, JustPressed)],
-        SpeedDownTime: [Key(LBracket, JustPressed)],
-        SpeedUpTime: [Key(RBracket, JustPressed)],
-        SetTimeBack: [KeyModified([LShift], LBracket, JustPressed)],
-        SetTimeForward: [KeyModified([LShift], RBracket, JustPressed)],
+Input((
+    bindings: {
+        "MovementInput": {
+            "Forward": [Key(W, Pressed), Key(Up, Pressed)],
+            "Backward": [Key(S, Pressed), Key(Down, Pressed)],
+            "Left": [Key(A, Pressed), Key(Left, Pressed)],
+            "Right": [Key(D, Pressed), Key(Right, Pressed)],
+            "Up": [Key(Space, Pressed)],
+            "Down": [Key(LControl, Pressed), Key(C, Pressed)],
+            "Sprint": [Key(LShift, Pressed)],
+        },
+        "DayNightInput": {
+            "PauseTime": [Key(P, JustPressed)],
+            "SpeedDownTime": [Key(LBracket, JustPressed)],
+            "SpeedUpTime": [Key(RBracket, JustPressed)],
+            "SetTimeBack": [KeyModified([LShift], LBracket, JustPressed)],
+            "SetTimeForward": [KeyModified([LShift], RBracket, JustPressed)],
+        },
     }
 ))

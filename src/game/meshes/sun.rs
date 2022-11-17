@@ -6,7 +6,7 @@ use splines::Spline;
 use crate::game::meshes::hexagon::create_single_block_mesh;
 use crate::io::config::DebugConfig;
 use crate::io::config::WorldConfig;
-use crate::io::input::{InputAction, InputHandler};
+use crate::io::input::{DayNightInput, InputHandler};
 
 #[derive(Component, Default)]
 pub struct Sun;
@@ -61,14 +61,14 @@ pub struct DayNight {
 }
 
 pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNight>) {
-    if input.is_active(&InputAction::PauseTime) {
+    if input.is_active(DayNightInput::PauseTime) {
         day_night.paused ^= true;
         info!(
             "Toggled day-night cycle {}!",
             if day_night.paused { "off" } else { "on" }
         );
     }
-    let speed = input.direction(&InputAction::SpeedDownTime, &InputAction::SpeedUpTime);
+    let speed = input.direction(DayNightInput::SpeedDownTime, DayNightInput::SpeedUpTime);
     if !speed.is_neutral() {
         let percent = day_night.timer.percent();
         let seconds_old = day_night.timer.duration().as_secs_f32();
@@ -84,7 +84,7 @@ pub fn process_day_night_input(input: InputHandler, mut day_night: ResMut<DayNig
             seconds_old, seconds_new
         );
     }
-    let set_time = input.direction(&InputAction::SetTimeBack, &InputAction::SetTimeForward);
+    let set_time = input.direction(DayNightInput::SetTimeBack, DayNightInput::SetTimeForward);
     if !set_time.is_neutral() {
         let duration = day_night.timer.duration().as_secs_f32();
         let percent =

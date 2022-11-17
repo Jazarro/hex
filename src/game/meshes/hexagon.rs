@@ -104,7 +104,7 @@ pub fn create_chunk_mesh(chunks: &Chunks, chunk_id: &ChunkId) -> Mesh {
             }
             let pos_absolute = pos_relative + chunk_id.center_pos();
             (0..2).for_each(|j: i8| {
-                if j==0 && pos_absolute.z() ==0 {
+                if j == 0 && pos_absolute.z() == 0 {
                     // Do not draw the bottom of the world, it's never seen.
                     return;
                 }

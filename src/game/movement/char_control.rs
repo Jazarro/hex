@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::game::actors::structs::Player;
 use crate::game::camera::first_person::PlayerCamera;
 use crate::game::movement::structs::{MoveInput, MoveParams, MoveState};
-use crate::io::input::{InputAction, InputHandler};
+use crate::io::input::{InputHandler, MovementInput};
 
 pub fn player_movement_system(
     mut q: Query<(&mut MoveState, &mut MoveParams, &mut Transform), With<Player>>,
@@ -130,13 +130,13 @@ pub fn read_movement_input(input: &InputHandler) -> MoveInput {
     MoveInput {
         xy_plane: Vec2::new(
             input
-                .direction(&InputAction::Left, &InputAction::Right)
+                .direction(MovementInput::Left, MovementInput::Right)
                 .signum(),
             input
-                .direction(&InputAction::Backward, &InputAction::Forward)
+                .direction(MovementInput::Backward, MovementInput::Forward)
                 .signum(),
         ),
-        up_down: input.direction(&InputAction::Down, &InputAction::Up),
-        sprint: input.is_active(&InputAction::Sprint),
+        up_down: input.direction(MovementInput::Down, MovementInput::Up),
+        sprint: input.is_active(MovementInput::Sprint),
     }
 }
