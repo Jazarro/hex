@@ -5,4 +5,18 @@ FileStructure((
         "config/input.config.ron",
         "config/world.config.ron",
     ],
+    sfx: {
+        "Monster": {
+            "Aggro": "audio/sfx/monster_aggro",
+            "Death": "audio/sfx/monster_death",
+            "Hit": "audio/sfx/monster_hit",
+            "Idle": "audio/sfx/monster_idle",
+        },
+    },
+    music: {
+        "BackgroundMusic": {
+            "ExistentialHexMan": "audio/music/existential_hex_man.mp3",
+            "HexagonalCubes": "audio/music/hexagonal_cubes.mp3",
+        },
+    },
 ))

@@ -1,1 +1,1 @@
-
+mod asset_ids;

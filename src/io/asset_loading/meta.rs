@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
-use crate::io::config::Config;
 use bevy::asset::{AssetLoader, BoxedFuture, Handle, HandleId, LoadContext, LoadedAsset};
 use bevy::reflect::TypeUuid;
 use serde::{Deserialize, Serialize};
+
+use crate::io::config::Config;
 
 /// Implement for any assets that can merge together different versions from different mods.
 /// Instead of wholesale replacing the file with the overriding one from a mod later in the mod
@@ -13,8 +14,8 @@ use serde::{Deserialize, Serialize};
 /// loading order.
 pub trait MergingAsset {
     fn merge(&self, accumulator: Option<Self>) -> Self
-    where
-        Self: Sized;
+        where
+            Self: Sized;
 }
 
 /// Used to temporarily store asset handles during loading time.
@@ -101,7 +102,12 @@ pub struct ModOrder {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct FileStructure {
+    /// A list of config files. Each file will be loaded by the ConfigLoader.
     pub configs: Vec<String>,
+    /// Maps SfxId.group_id() and SfxId.item_id() to an asset directory of sound effect files.
+    pub sfx: HashMap<String, HashMap<String, String>>,
+    /// Maps SfxId.group_id() and SfxId.item_id() to an asset directory of music files.
+    pub music: HashMap<String, HashMap<String, String>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

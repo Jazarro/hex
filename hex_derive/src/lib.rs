@@ -1,14 +1,24 @@
 use proc_macro::TokenStream;
 
-use quote::{quote, quote_spanned};
-use syn::spanned::Spanned;
+use quote::{format_ident, quote, quote_spanned};
 use syn::{Data, DeriveInput};
+use syn::spanned::Spanned;
 
-/// This is a custom derive macro for the InputAction type.
-///
-/// See: https://doc.rust-lang.org/book/ch19-06-macros.html#how-to-write-a-custom-derive-macro
+#[proc_macro_derive(SfxId)]
+pub fn derive_sfx_id(input: TokenStream) -> TokenStream {
+    derive_id(input, "SfxId")
+}
+#[proc_macro_derive(MusicId)]
+pub fn derive_music_id(input: TokenStream) -> TokenStream {
+    derive_id(input, "MusicId")
+}
 #[proc_macro_derive(InputAction)]
 pub fn derive_input_action(input: TokenStream) -> TokenStream {
+    derive_id(input, "InputAction")
+}
+
+/// See: https://doc.rust-lang.org/book/ch19-06-macros.html#how-to-write-a-custom-derive-macro
+fn derive_id(input: TokenStream, trait_name: &str) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
     let name = &ast.ident;
     let enum_item_literal = match &ast.data {
@@ -39,8 +49,9 @@ pub fn derive_input_action(input: TokenStream) -> TokenStream {
         }
     };
     let enum_name_literal = name.to_string();
+    let trait_ident = format_ident!("{}", trait_name);
     let output = quote! {
-        impl InputAction for #name {
+        impl #trait_ident for #name {
             fn group_id(&self) -> &'static str {
                 #enum_name_literal
             }
