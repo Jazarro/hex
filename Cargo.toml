@@ -25,12 +25,11 @@ opt-level = 3
 hex_derive = { path = "./hex_derive" }
 
 # These three egui crates are only compiled if the debugwindow feature flag is enabled:
-egui = { version = "0.20.1", optional = true }
-bevy_egui = { version = "0.19.0", optional = true }
-bevy-inspector-egui = { version = "0.17.0", optional = true }
+egui = { version = "0.21.0", optional = true }
+bevy_egui = { version = "0.20.1", optional = true }
+bevy-inspector-egui = { version = "0.18.1", optional = true }
 
-bevy_kira_audio = { version = "0.13.0", features = ["ogg"] }
-iyes_loopless = "0.9.1"
+bevy_kira_audio = { version = "0.15.0", features = ["ogg"] }
 noise = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 rand = "*"
@@ -39,65 +38,40 @@ splines = "4.1.1"
 once_cell = "1.16"
 
 [dependencies.bevy]
-version = "0.9.1"
+version = "0.10.0"
 # We must disable default features because we're using bevy_kira_audio:
-default-features = false
+default-features = true
 # Now we have to add all default features we want back in:
 features = [
 
     # These are the default features:
     # (re-enable whichever you like)
+    "animation",
     "bevy_asset",
-    #    "bevy_scene",
-
-    # Bevy functionality:
-    #    "animation",          # Animation support
-    #    "bevy_gilrs",         # Gamepad input support
-    #    "bevy_audio",         # Builtin audio
-    "bevy_winit", # Window management
-    "x11", # Linux: Support X11 windowing system
-    #    "filesystem_watcher", # Asset hot-reloading
-    "render", # Graphics Rendering
-
-    ## "render" actually just includes:
-    ## (feel free to use just a subset of these, instead of "render")
-    "bevy_render", # Rendering framework core
-    "bevy_core_pipeline", # Higher-level rendering abstractions
-    "bevy_sprite", # 2D (sprites) rendering
-    "bevy_pbr", # 3D (physically-based) rendering
-    "bevy_gltf", # GLTF 3D assets format support
-    "bevy_text", # Text/font rendering
-    "bevy_ui", # UI toolkit
-
-    # File formats:
-    #    "png",
-    #    "hdr",
-    #    "vorbis",
-
-    # These are other features that may be of interest:
-    # (add any of these that you need)
+    "bevy_audio",
+    "bevy_gilrs",
+    "bevy_scene",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "png",
+    "hdr",
+    "ktx2",
+    "zstd",
+    "vorbis",
+    "x11",
+    "filesystem_watcher",
+    "android_shared_stdcxx",
+    "tonemapping_luts",
 
     # Bevy functionality:
     "wayland", # Linux: Support Wayland windowing system
     "subpixel_glyph_atlas", # Subpixel antialiasing for text/fonts
     "serialize", # Support for `serde` Serialize/Deserialize
 
-    # File formats:
-    #    "ktx2", # preferred format for GPU textures
-    #    "dds",
-    #    "jpeg",
-    #    "bmp",
-    #    "tga",
-    #    "basis-universal",
-    #    "zstd", # needed if using zstd in KTX2 files
-    #    "flac",
-    #    "mp3",
-    #    "wav",
-
-    # Development/Debug features:
-    #        "dynamic",      # Dynamic linking for faster compile-times
-    #    "trace",        # Enable tracing for performance measurement
-    #    "trace_tracy",  # Tracing using `tracy`
-    #    "trace_chrome", # Tracing using the Chrome format
-    #    "wgpu_trace",   # WGPU/rendering tracing
 ]

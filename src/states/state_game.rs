@@ -1,10 +1,8 @@
 use std::time::Duration;
 
-use bevy::app::CoreStage::Update;
 use bevy::app::{App, Plugin};
+use bevy::app::CoreSet::Update;
 use bevy::prelude::*;
-use iyes_loopless::condition::ConditionSet;
-use iyes_loopless::prelude::{AppLooplessFixedTimestepExt, AppLooplessStateExt};
 
 use crate::game::actors::player::setup_player;
 use crate::game::actors::structs::Player;
@@ -27,42 +25,49 @@ impl Plugin for GameState {
     fn build(&self, app: &mut App) {
         app.insert_resource(Chunks::default());
         app.add_event::<LoadUnloadEvent>();
-        app.add_enter_system_set(
-            AppState::Game,
-            ConditionSet::new()
-                .run_in_state(AppState::Game)
-                .with_system(cursor_grab)
-                .with_system(spawn_sun)
-                .with_system(setup_player)
-                .with_system(spawn_debug_lines)
-                // .with_system(spawn_test_grid)
-                .into(),
-        )
-        // Checking to see if chunks must be loaded is only necessary every once in a while, not every tick:
-        .add_fixed_timestep(Duration::from_millis(1000), "check_chunk_loading")
-        .add_fixed_timestep_child_stage("check_chunk_loading")
-        .add_fixed_timestep_system("check_chunk_loading", 0, check_chunk_loader)
-        // The actual chunk loading is only done when a LoadUnloadEvent is sent:
-        .add_stage_after(Update, "perform_chunk_loading", SystemStage::parallel())
-        .add_system_set_to_stage(
-            "perform_chunk_loading",
-            ConditionSet::new()
-                .run_in_state(AppState::Game)
-                .run_on_event::<LoadUnloadEvent>()
-                .with_system(load_unload_chunks)
-                .into(),
-        )
-        .add_system_set(
-            ConditionSet::new()
-                .run_in_state(AppState::Game)
-                .with_system(process_day_night_input)
-                .with_system(animate_sun)
-                .with_system(player_movement_system)
-                .with_system(rotate_player_camera)
-                .with_system(position_player_camera)
-                // .with_system(debug_print_coordinates)
-                .into(),
+        app.add_systems(
+            (
+                cursor_grab,
+                spawn_sun,
+                setup_player,
+                spawn_debug_lines,
+                // spawn_test_grid,
+            )
+                .in_schedule(OnEnter(AppState::Game)),
         );
+
+        app.add_systems(
+            (
+                process_day_night_input,
+                animate_sun,
+                player_movement_system,
+                rotate_player_camera,
+                position_player_camera,
+                // debug_print_coordinates,
+            )
+                .in_set(OnUpdate(AppState::Game)),
+        );
+
+        // app.insert_resource(FixedTime::new(Duration::from_millis(100)));
+        // app.add_system(check_chunk_loader
+        //     .in_set(OnUpdate(AppState::Game))
+        //     .in_schedule(CoreSchedule::FixedUpdate));
+
+        // app
+        //     // Checking to see if chunks must be loaded is only necessary every once in a while, not every tick:
+        //     .add_fixed_timestep(Duration::from_millis(1000), "check_chunk_loading")
+        //     .add_fixed_timestep_child_stage("check_chunk_loading")
+        //     .add_fixed_timestep_system("check_chunk_loading", 0, check_chunk_loader)
+        //     // The actual chunk loading is only done when a LoadUnloadEvent is sent:
+        //     .add_stage_after(Update, "perform_chunk_loading", SystemStage::parallel())
+        //     .add_system_set_to_stage(
+        //         "perform_chunk_loading",
+        //         ConditionSet::new()
+        //             .run_in_state(AppState::Game)
+        //             .run_on_event::<LoadUnloadEvent>()
+        //             .with_system(load_unload_chunks)
+        //             .into(),
+        //     );
     }
 }
 

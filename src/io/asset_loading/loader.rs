@@ -3,11 +3,11 @@ use crate::io::asset_loading::MergingAsset;
 use crate::io::config::Config;
 use bevy::asset::{AssetServer, LoadState};
 use bevy::prelude::*;
-use iyes_loopless::prelude::NextState;
 
 /// These are sub-states that the loading state works through.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Default, Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum LoadProcess {
+    #[default]
     StartLoading,
     LoadModOrder,
     WaitForModOrder,
@@ -20,7 +20,11 @@ pub enum LoadProcess {
 }
 
 /// Executes during LoadingState if LoadOrder isn't present as resource.
-pub fn load_mod_order(mut commands: Commands, server: Res<AssetServer>) {
+pub fn load_mod_order(
+    mut commands: Commands,
+    server: Res<AssetServer>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
+) {
     info!("Loading mod_order.meta.ron");
     info!("Loading file_structure.meta.ron");
     let handles = LoaderHandles {
@@ -29,13 +33,14 @@ pub fn load_mod_order(mut commands: Commands, server: Res<AssetServer>) {
         ..default()
     };
     commands.insert_resource(handles);
-    commands.insert_resource(NextState(LoadProcess::WaitForModOrder));
+    next_state.set(LoadProcess::WaitForModOrder);
 }
 
 pub fn check_mod_order_is_present(
     mut commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     let mod_order_loaded = match server.get_load_state(&handles.mod_order) {
         LoadState::Loaded => true,
@@ -54,7 +59,7 @@ pub fn check_mod_order_is_present(
         _ => false,
     };
     if mod_order_loaded && manifest_loaded {
-        commands.insert_resource(NextState(LoadProcess::LoadManifests));
+        next_state.set(LoadProcess::LoadManifests);
     }
 }
 
@@ -63,6 +68,7 @@ pub fn load_manifests(
     server: Res<AssetServer>,
     mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     info!("Loading mod manifests...");
     let mod_order = assets.get(&handles.mod_order);
@@ -76,7 +82,7 @@ pub fn load_manifests(
             server.load(format!("{}/manifest.meta.ron", mod_name)),
         );
     }
-    commands.insert_resource(NextState(LoadProcess::WaitForManifests));
+    next_state.set(LoadProcess::WaitForManifests);
 }
 
 pub fn check_manifests_are_present(
@@ -84,6 +90,7 @@ pub fn check_manifests_are_present(
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
     mut assets: ResMut<Assets<MetaAsset>>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     let mod_order = assets.get_mut(&handles.mod_order);
     let mod_order = mod_order
@@ -111,7 +118,7 @@ pub fn check_manifests_are_present(
         }
     });
     if all_finished {
-        commands.insert_resource(NextState(LoadProcess::LoadFiles));
+        next_state.set(LoadProcess::LoadFiles);
     }
 }
 
@@ -120,6 +127,7 @@ pub fn load_files(
     server: Res<AssetServer>,
     mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     let mod_order = assets.get(&handles.mod_order);
     let mod_order = mod_order
@@ -138,17 +146,18 @@ pub fn load_files(
             }
         }
     }
-    commands.insert_resource(NextState(LoadProcess::WaitForFiles));
+    next_state.set(LoadProcess::WaitForFiles);
 }
 
 pub fn check_files_are_present(
     mut commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     match server.get_group_load_state(handles.all_handles()) {
         LoadState::Loaded => {
-            commands.insert_resource(NextState(LoadProcess::ResolveMods));
+            next_state.set(LoadProcess::ResolveMods);
         }
         LoadState::Failed => {
             error!("Failed to load assets!");
@@ -162,6 +171,7 @@ pub fn resolve_mods(
     handles: Res<LoaderHandles>,
     meta_assets: Res<Assets<MetaAsset>>,
     configs: Res<Assets<Config>>,
+    mut next_state: ResMut<NextState<LoadProcess>>,
 ) {
     let file_structure = meta_assets.get(&handles.file_structure);
     let file_structure = file_structure
@@ -186,5 +196,5 @@ pub fn resolve_mods(
             panic!("Failed to load resource {}.", config_type);
         }
     }
-    commands.insert_resource(NextState(LoadProcess::DoneLoading));
+    next_state.set(LoadProcess::DoneLoading);
 }

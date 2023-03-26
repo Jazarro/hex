@@ -15,7 +15,6 @@ use crate::states::*;
 use bevy::log::Level;
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
-use iyes_loopless::prelude::{AppLooplessStateExt, CurrentState};
 
 #[cfg(feature = "debugwindow")]
 use crate::debug_window::DebugWindowPlugin;
@@ -47,7 +46,7 @@ fn main() {
     }));
     app.add_plugin(MaterialPlugin::<LineMaterial>::default())
         .add_system(close_on_esc)
-        .add_loopless_state(AppState::Loading)
+        .add_state::<AppState>()
         .add_plugin(LoadingState)
         .add_plugin(GameState)
         .add_system(handle_window)
@@ -58,7 +57,7 @@ fn main() {
     app.run();
 }
 
-pub fn log_state_changes(state: Res<CurrentState<AppState>>) {
+pub fn log_state_changes(state: Res<State<AppState>>) {
     if state.is_changed() {
         info!("Switching to game state {:?}!", state.0);
     }
