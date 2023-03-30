@@ -1,7 +1,4 @@
-use std::time::Duration;
-
 use bevy::app::{App, Plugin};
-use bevy::app::CoreSet::Update;
 use bevy::prelude::*;
 
 use crate::game::actors::player::setup_player;
@@ -10,9 +7,7 @@ use crate::game::camera::first_person::{
     cursor_grab, position_player_camera, rotate_player_camera,
 };
 use crate::game::hex_grid::axial::{ChunkId, Pos};
-use crate::game::hex_grid::chunk_loading::{
-    check_chunk_loader, load_unload_chunks, LoadUnloadEvent,
-};
+use crate::game::hex_grid::chunk_loading::LoadUnloadEvent;
 use crate::game::hex_grid::chunks::Chunks;
 use crate::game::meshes::debug_lines::spawn_debug_lines;
 use crate::game::meshes::sun::{animate_sun, process_day_night_input, spawn_sun};

@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+#default= [ "debugwindow" ]
 # Defines a feature named `debugwindow` that does not enable any other features.
-debugwindow = ["dep:egui", "dep:bevy_egui", "dep:bevy-inspector-egui"]
+debugwindow = ["dep:egui", "dep:bevy_egui", "dep:bevy-inspector-egui", ]
 
 [workspace]
 resolver = "2"

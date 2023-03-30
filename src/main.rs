@@ -17,7 +17,7 @@ use bevy::prelude::*;
 use bevy::window::close_on_esc;
 
 #[cfg(feature = "debugwindow")]
-use crate::debug_window::DebugWindowPlugin;
+use crate::io::window::DebugWindowPlugin;
 mod game;
 mod io;
 mod states;

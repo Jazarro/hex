@@ -70,6 +70,6 @@ fn init_load_process(mut commands: Commands) {
     commands.insert_resource(NextState(Some(LoadProcess::LoadModOrder)));
 }
 
-fn exit_loading_state(mut commands: Commands, mut next_state: ResMut<NextState<AppState>>) {
+fn exit_loading_state(commands: Commands, mut next_state: ResMut<NextState<AppState>>) {
     next_state.set(AppState::Game);
 }

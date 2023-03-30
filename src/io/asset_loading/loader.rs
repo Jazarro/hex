@@ -37,7 +37,7 @@ pub fn load_mod_order(
 }
 
 pub fn check_mod_order_is_present(
-    mut commands: Commands,
+    commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
     mut next_state: ResMut<NextState<LoadProcess>>,
@@ -64,7 +64,7 @@ pub fn check_mod_order_is_present(
 }
 
 pub fn load_manifests(
-    mut commands: Commands,
+    commands: Commands,
     server: Res<AssetServer>,
     mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
@@ -86,7 +86,7 @@ pub fn load_manifests(
 }
 
 pub fn check_manifests_are_present(
-    mut commands: Commands,
+    commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
     mut assets: ResMut<Assets<MetaAsset>>,
@@ -123,7 +123,7 @@ pub fn check_manifests_are_present(
 }
 
 pub fn load_files(
-    mut commands: Commands,
+    commands: Commands,
     server: Res<AssetServer>,
     mut handles: ResMut<LoaderHandles>,
     assets: Res<Assets<MetaAsset>>,
@@ -150,7 +150,7 @@ pub fn load_files(
 }
 
 pub fn check_files_are_present(
-    mut commands: Commands,
+    commands: Commands,
     handles: Res<LoaderHandles>,
     server: Res<AssetServer>,
     mut next_state: ResMut<NextState<LoadProcess>>,
