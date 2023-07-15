@@ -27,7 +27,11 @@ impl Chunks {
     }
     /// Removes chunks from memory that are not in the given whitelist.
     pub fn cull_chunks(&mut self, allowed: &HashSet<ChunkId>) {
-        let _ = self.chunks.drain_filter(|key, _| !allowed.contains(key));
+        let keys: Vec<_> = self.chunks.keys().filter(|&key| !allowed.contains(key))
+            .collect();
+        for &key in keys.iter() {
+            self.chunks.remove(key);
+        }
     }
     #[must_use]
     pub fn contains(&self, id: &ChunkId) -> bool {

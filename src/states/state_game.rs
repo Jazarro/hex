@@ -1,3 +1,4 @@
+use std::time::Duration;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 
@@ -7,7 +8,7 @@ use crate::game::camera::first_person::{
     cursor_grab, position_player_camera, rotate_player_camera,
 };
 use crate::game::hex_grid::axial::{ChunkId, Pos};
-use crate::game::hex_grid::chunk_loading::LoadUnloadEvent;
+use crate::game::hex_grid::chunk_loading::{check_chunk_loader, LoadUnloadEvent};
 use crate::game::hex_grid::chunks::Chunks;
 use crate::game::meshes::debug_lines::spawn_debug_lines;
 use crate::game::meshes::sun::{animate_sun, process_day_night_input, spawn_sun};
@@ -43,10 +44,11 @@ impl Plugin for GameState {
                 .in_set(OnUpdate(AppState::Game)),
         );
 
-        // app.insert_resource(FixedTime::new(Duration::from_millis(100)));
-        // app.add_system(check_chunk_loader
-        //     .in_set(OnUpdate(AppState::Game))
-        //     .in_schedule(CoreSchedule::FixedUpdate));
+        // TODO: Use async tasks
+        app.insert_resource(FixedTime::new(Duration::from_millis(100)));
+        app.add_system(check_chunk_loader
+            .in_set(OnUpdate(AppState::Game))
+            .in_schedule(CoreSchedule::FixedUpdate));
 
         // app
         //     // Checking to see if chunks must be loaded is only necessary every once in a while, not every tick:

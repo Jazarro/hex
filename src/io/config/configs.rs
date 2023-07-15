@@ -1,14 +1,14 @@
 use crate::io::asset_loading::MergingAsset;
 use bevy::asset::{AssetLoader, BoxedFuture, LoadContext, LoadedAsset};
 use bevy::prelude::Commands;
-use bevy::reflect::TypeUuid;
+use bevy::reflect::{TypePath, TypeUuid};
 use serde::{Deserialize, Serialize};
 
 use crate::io::config::{AudioConfig, DebugConfig, InputConfig, WorldConfig};
 
 /// This wrapper around the different config types is needed to create a single AssetLoader for
 /// all configs. Otherwise we'd need to implement a separate AssetLoader per config type.
-#[derive(Debug, Deserialize, Serialize, TypeUuid, Clone)]
+#[derive(Debug, Deserialize, Serialize, TypeUuid,TypePath,  Clone)]
 #[serde(deny_unknown_fields)]
 #[uuid = "fda5258c-c2ee-4975-823d-cd4f9756b380"]
 pub enum Config {

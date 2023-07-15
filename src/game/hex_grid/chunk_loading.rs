@@ -40,6 +40,7 @@ pub struct ChunkMesh {
     pub id: ChunkId,
 }
 
+#[derive(Event)]
 pub struct LoadUnloadEvent {
     pub to_be_loaded: HashSet<ChunkId>,
     pub to_be_rendered: HashSet<ChunkId>,
@@ -122,7 +123,7 @@ pub fn load_unload_chunks(
     // Create meshes for chunks that should be rendered:
     to_be_rendered
         .iter()
-        .filter(|id| !are_rendered.contains(id))
+        .filter(|id| !are_rendered.contains(*id))
         .for_each(|id| {
             commands
                 .spawn(MaterialMeshBundle {

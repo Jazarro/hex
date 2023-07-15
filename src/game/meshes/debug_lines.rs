@@ -1,3 +1,4 @@
+use bevy::reflect::TypePath;
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey};
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
@@ -157,7 +158,7 @@ impl From<LineList> for Mesh {
     }
 }
 
-#[derive(Default, AsBindGroup, TypeUuid, Debug, Clone)]
+#[derive(Default, AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "050ce6ac-080a-4d8c-b6b5-b5bab7560d8f"]
 pub struct LineMaterial {
     #[uniform(0)]

@@ -14,7 +14,6 @@ pub struct PlayerCamera {
 #[derive(Bundle, Default)]
 pub struct PlayerCameraBundle {
     pub player_cam: PlayerCamera,
-    #[bundle]
     pub camera_3d: Camera3dBundle,
 }
 

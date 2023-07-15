@@ -15,6 +15,5 @@ pub struct PlayerBundle {
     pub(crate) move_params: MoveParams,
     pub(crate) move_state: MoveState,
     pub(crate) chunk_loader: ChunkLoader,
-    #[bundle]
     pub transform: TransformBundle,
 }

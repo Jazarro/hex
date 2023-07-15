@@ -1,6 +1,6 @@
 use bevy::app::{App, Plugin};
 use bevy::asset::AddAsset;
-use bevy::prelude::{in_state, Commands, IntoSystemConfig, NextState, OnUpdate, ResMut};
+use bevy::prelude::{in_state, Commands, NextState, Update, ResMut};
 
 use crate::io::asset_loading::*;
 use crate::io::config::{Config, ConfigLoader};
@@ -60,8 +60,8 @@ impl Plugin for LoadingState {
         );
         app.add_systems(
             (exit_loading_state, process_input_bindings)
-                .in_set(OnUpdate(AppState::Loading))
-                .in_set(OnUpdate(LoadProcess::DoneLoading)),
+                .in_set(Update(AppState::Loading))
+                .in_set(Update(LoadProcess::DoneLoading)),
         );
     }
 }

@@ -1,6 +1,6 @@
 use bevy::asset::{AssetLoader, BoxedFuture, Handle, HandleId, LoadContext, LoadedAsset};
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
+use bevy::reflect::{TypePath, TypeUuid};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -52,7 +52,7 @@ impl LoaderHandles {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, TypeUuid, Clone)]
+#[derive(Debug, Deserialize, Serialize, TypeUuid, TypePath, Clone)]
 #[serde(deny_unknown_fields)]
 #[uuid = "068dac31-04ec-475e-86fb-6a1272c46f88"]
 pub enum MetaAsset {
