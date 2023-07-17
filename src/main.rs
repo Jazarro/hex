@@ -59,6 +59,6 @@ fn main() {
 
 pub fn log_state_changes(state: Res<State<AppState>>) {
     if state.is_changed() {
-        info!("Switching to game state {:?}!", state.0);
+        info!("Switching to game state {:?}!", state.get());
     }
 }

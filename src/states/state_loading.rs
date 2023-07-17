@@ -18,50 +18,50 @@ impl Plugin for LoadingState {
             .init_asset_loader::<ConfigLoader>()
             .add_state::<LoadProcess>();
 
-        app.add_system(
+        app.add_systems(Update,
             init_load_process
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::StartLoading)),
         );
-        app.add_system(
+        app.add_systems(Update,
             load_mod_order
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::LoadModOrder)),
         );
-        app.add_system(
+        app.add_systems(Update,
             check_mod_order_is_present
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::WaitForModOrder)),
         );
-        app.add_system(
+        app.add_systems(Update,
             load_manifests
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::LoadManifests)),
         );
-        app.add_system(
+        app.add_systems(Update,
             check_manifests_are_present
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::WaitForManifests)),
         );
-        app.add_system(
+        app.add_systems(Update,
             load_files
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::LoadFiles)),
         );
-        app.add_system(
+        app.add_systems(Update,
             check_files_are_present
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::WaitForFiles)),
         );
-        app.add_system(
+        app.add_systems(Update,
             resolve_mods
                 .run_if(in_state(AppState::Loading))
                 .run_if(in_state(LoadProcess::ResolveMods)),
         );
-        app.add_systems(
+        app.add_systems(Update,
             (exit_loading_state, process_input_bindings)
-                .in_set(Update(AppState::Loading))
-                .in_set(Update(LoadProcess::DoneLoading)),
+                .run_if(in_state(AppState::Loading))
+                .run_if(in_state(LoadProcess::DoneLoading)),
         );
     }
 }

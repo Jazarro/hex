@@ -21,18 +21,17 @@ impl Plugin for GameState {
     fn build(&self, app: &mut App) {
         app.insert_resource(Chunks::default());
         app.add_event::<LoadUnloadEvent>();
-        app.add_systems(
+        app.add_systems(OnEnter(AppState::Game),
             (
                 cursor_grab,
                 spawn_sun,
                 setup_player,
                 spawn_debug_lines,
                 // spawn_test_grid,
-            )
-                .in_schedule(OnEnter(AppState::Game)),
+            ),
         );
 
-        app.add_systems(
+        app.add_systems(Update,
             (
                 process_day_night_input,
                 animate_sun,
@@ -40,15 +39,13 @@ impl Plugin for GameState {
                 rotate_player_camera,
                 position_player_camera,
                 // debug_print_coordinates,
-            )
-                .in_set(OnUpdate(AppState::Game)),
+            ).run_if(in_state(AppState::Game)),
         );
 
         // TODO: Use async tasks
         app.insert_resource(FixedTime::new(Duration::from_millis(100)));
-        app.add_system(check_chunk_loader
-            .in_set(OnUpdate(AppState::Game))
-            .in_schedule(CoreSchedule::FixedUpdate));
+        // TODO: This one used to run in fixed update??
+        app.add_systems(Update,check_chunk_loader.run_if(in_state(AppState::Game)));
 
         // app
         //     // Checking to see if chunks must be loaded is only necessary every once in a while, not every tick:
