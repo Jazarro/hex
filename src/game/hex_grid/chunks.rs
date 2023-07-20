@@ -27,10 +27,12 @@ impl Chunks {
     }
     /// Removes chunks from memory that are not in the given whitelist.
     pub fn cull_chunks(&mut self, allowed: &HashSet<ChunkId>) {
+        // TODO: Filter drain would be better, but it is unstable? For now, have to clone the keys we want to remove.
         let keys: Vec<_> = self.chunks.keys().filter(|&key| !allowed.contains(key))
+            .cloned()
             .collect();
         for &key in keys.iter() {
-            self.chunks.remove(key);
+            self.chunks.remove(&key);
         }
     }
     #[must_use]

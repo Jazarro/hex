@@ -35,7 +35,7 @@ fn main() {
         // - wgpu is super spammy and restricted to error
         // - symphonia occasionally logs spam to info level so is restricted to warn
         // - Our own crate hex is set to debug, so is actually allowed to be more spammy than the default info level.
-        filter: "info,wgpu=error,symphonia_core=warn,symphonia_format_ogg=warn,symphonia_codec_vorbis=warn,symphonia_bundle_mp3=warn,hex=debug".into(),
+        filter: "info,wgpu=info,symphonia_core=warn,symphonia_format_ogg=warn,symphonia_codec_vorbis=warn,symphonia_bundle_mp3=warn,hex=debug".into(),
         level: Level::TRACE,
     }));
     // this code is compiled only if debug assertions are disabled (release mode)
